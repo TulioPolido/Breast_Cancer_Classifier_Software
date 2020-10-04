@@ -2,6 +2,19 @@
 
 import PySimpleGUI as sg
 import os.path
+from PIL import Image, ImageTk
+
+def get_img_data(f, maxsize=(1200, 850), first=False):
+    """Generate image data using PIL
+    """
+    img = Image.open(f)
+    img.thumbnail(maxsize)
+    if first:                     # tkinter is inactive the first time
+        bio = io.BytesIO()
+        img.save(bio, format="PNG")
+        del img
+        return bio.getvalue()
+    return ImageTk.PhotoImage(img)
 
 # First the window layout in 2 columns
 
@@ -9,7 +22,7 @@ file_list_column = [
     [
         sg.Text("Image Folder"),
         sg.In(size=(25, 1), enable_events=True, key="-FOLDER-"),
-        sg.FolderBrowse(),
+        sg.FolderBrowse(initial_folder="."),
     ],
     [
         sg.Listbox(
@@ -41,6 +54,7 @@ while True:
     event, values = window.read()
     if event == "Exit" or event == sg.WIN_CLOSED:
         break
+
     # Folder name was filled in, make a list of files in the folder
     if event == "-FOLDER-":
         folder = values["-FOLDER-"]
@@ -54,7 +68,7 @@ while True:
             f
             for f in file_list
             if os.path.isfile(os.path.join(folder, f))
-            and f.lower().endswith((".png", ".tiff", ".DCM"))
+            and f.lower().endswith((".png", ".tiff", ".dcm"))
         ]
         window["-FILE LIST-"].update(fnames)
     elif event == "-FILE LIST-":  # A file was chosen from the listbox
@@ -62,8 +76,17 @@ while True:
             filename = os.path.join(
                 values["-FOLDER-"], values["-FILE LIST-"][0]
             )
-            window["-TOUT-"].update(filename)
-            window["-IMAGE-"].update(filename=filename)
+            if filename.lower().endswith(".tiff"):
+                window["-TOUT-"].update("O arquivo eh .tiff")
+                window["-IMAGE-"].update(filename=get_img_data(filename, first=True))
+
+            elif filename.lower().endswith(".dcm"):
+                window["-TOUT-"].update("O arquivo eh .dcm")
+                window["-IMAGE-"].update(filename=filename)  
+
+            else:
+                window["-TOUT-"].update("O arquivo eh .png")
+                window["-IMAGE-"].update(filename=filename)
 
         except:
             pass
