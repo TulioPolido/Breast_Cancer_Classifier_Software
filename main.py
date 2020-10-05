@@ -1,94 +1,77 @@
-# img_viewer.py
-
 import PySimpleGUI as sg
-import os.path
+import os
 from PIL import Image, ImageTk
+import io
 
 def get_img_data(f, maxsize=(1200, 850), first=False):
-    """Generate image data using PIL
-    """
+    """Gera as imagens utilizando Pillow"""
+
     img = Image.open(f)
     img.thumbnail(maxsize)
-    if first:                     # tkinter is inactive the first time
+    if first:
         bio = io.BytesIO()
         img.save(bio, format="PNG")
         del img
         return bio.getvalue()
     return ImageTk.PhotoImage(img)
 
-# First the window layout in 2 columns
 
-file_list_column = [
-    [
-        sg.Text("Image Folder"),
-        sg.In(size=(25, 1), enable_events=True, key="-FOLDER-"),
-        sg.FolderBrowse(initial_folder="."),
-    ],
-    [
-        sg.Listbox(
-            values=[], enable_events=True, size=(40, 20), key="-FILE LIST-"
-        )
-    ],
-]
+#Driver
+folder = sg.popup_get_folder('Escolha a pasta de imagens:', default_path='.')
+if not folder:
+    sg.popup_cancel('Cancelando.')
+    raise SystemExit()
 
-# For now will only show the name of the file that was chosen
-image_viewer_column = [
-    [sg.Text("Choose an image from list on left:")],
-    [sg.Text(size=(40, 1), key="-TOUT-")],
-    [sg.Image(key="-IMAGE-")],
-]
+img_types = (".png", ".dcm", ".tiff") #Tipos de imagens suportados
+flist0 = os.listdir(folder) #Listagem de arquivos no diretorio
+fnames = [f for f in flist0 if os.path.isfile(os.path.join(folder, f)) and f.lower().endswith(img_types)] #Nomes das imagens a serem listadas
 
-# ----- Full layout -----
-layout = [
-    [
-        sg.Column(file_list_column),
-        sg.VSeperator(),
-        sg.Column(image_viewer_column),
-    ]
-]
+num_files = len(fnames) #qtd de imagens
+if num_files == 0:
+    sg.popup('A pasta escolhida está vazia.')
+    raise SystemExit()
 
-window = sg.Window("Image Viewer", layout)
+filename = os.path.join(folder, fnames[0])  #Pega a primeira imagem como arquivo inicial a ser exibido
+image_elem = sg.Image(data=get_img_data(filename, first=True)) #Estabelece como o elemento imagem deve ser exibido
+filename_display_elem = sg.Text(filename, size=(80, 3)) #Estabelece como o nome da imagem deve ser exibido
 
-# Run the Event Loop
+#Coluna que exibe a imagem a seu nome
+col = [[filename_display_elem],
+       [image_elem],
+       [sg.Button('Zoom In', size=(8, 2)), sg.Button('Zoom Out', size=(8, 2))]]
+
+#Coluna que lista os elementos da pasta
+col_files = [[sg.Listbox(values=fnames, change_submits=True, size=(60, 30), key='listbox')]]
+
+#Layout completo
+layout = [[sg.Column(col_files), sg.Column(col)]]
+
+window = sg.Window('Trabalho de PI', layout, return_keyboard_events=True,
+                   location=(0, 0), use_default_focus=False)
+
+# loop do programa
+i = 0
 while True:
     event, values = window.read()
-    if event == "Exit" or event == sg.WIN_CLOSED:
+    print(event, values) #Para debugar
+   
+    if event == sg.WIN_CLOSED: #Se janela for fechada, sair finalizar o loop
         break
+    elif event == 'listbox': 
+        f = values["listbox"][0]            
+        filename = os.path.join(folder, f)  
+        i = fnames.index(f)  
+    elif event in ('Zoom Out', 'MouseWheel:Down'):     
+        print("Zoom Out")  
+    elif event in ('Zoom IN', 'MouseWheel:Up'):     
+        print("Zoom In")           
+    else:
+        filename = os.path.join(folder, fnames[i])
 
-    # Folder name was filled in, make a list of files in the folder
-    if event == "-FOLDER-":
-        folder = values["-FOLDER-"]
-        try:
-            # Get list of files in folder
-            file_list = os.listdir(folder)
-        except:
-            file_list = []
-
-        fnames = [
-            f
-            for f in file_list
-            if os.path.isfile(os.path.join(folder, f))
-            and f.lower().endswith((".png", ".tiff", ".dcm"))
-        ]
-        window["-FILE LIST-"].update(fnames)
-    elif event == "-FILE LIST-":  # A file was chosen from the listbox
-        try:
-            filename = os.path.join(
-                values["-FOLDER-"], values["-FILE LIST-"][0]
-            )
-            if filename.lower().endswith(".tiff"):
-                window["-TOUT-"].update("O arquivo eh .tiff")
-                window["-IMAGE-"].update(filename=get_img_data(filename, first=True))
-
-            elif filename.lower().endswith(".dcm"):
-                window["-TOUT-"].update("O arquivo eh .dcm")
-                window["-IMAGE-"].update(filename=filename)  
-
-            else:
-                window["-TOUT-"].update("O arquivo eh .png")
-                window["-IMAGE-"].update(filename=filename)
-
-        except:
-            pass
+    if filename.endswith(".dcm"): #Se for DICOM necessitará de conversão
+        print("Arquivo dcm")
+    else:
+        image_elem.update(data=get_img_data(filename, first=True)) #Atualiza imagem
+        filename_display_elem.update(filename) #Atualiza nome da imagem
 
 window.close()
