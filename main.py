@@ -3,10 +3,15 @@ import os
 from PIL import Image, ImageTk
 import io
 
-def get_img_data(f, maxsize=(1200, 850), first=False):
+def get_img_data(f, zoom, maxsize=(650, 650), first=False):
     """Gera as imagens utilizando Pillow"""
 
     img = Image.open(f)
+    w = img.width
+    h = img.height
+    w = int(w * zoom)
+    h = int(h * zoom)
+    img = img.resize((w,h))
     img.thumbnail(maxsize)
     if first:
         bio = io.BytesIO()
@@ -17,7 +22,8 @@ def get_img_data(f, maxsize=(1200, 850), first=False):
 
 
 #Driver
-folder = sg.popup_get_folder('Escolha a pasta de imagens:', default_path='.')
+zoom = float(1)
+folder = sg.popup_get_folder('Escolha a pasta de imagens:', default_path='')
 if not folder:
     sg.popup_cancel('Cancelando.')
     raise SystemExit()
@@ -32,7 +38,7 @@ if num_files == 0:
     raise SystemExit()
 
 filename = os.path.join(folder, fnames[0])  #Pega a primeira imagem como arquivo inicial a ser exibido
-image_elem = sg.Image(data=get_img_data(filename, first=True)) #Estabelece como o elemento imagem deve ser exibido
+image_elem = sg.Image(data=get_img_data(filename, zoom, first=True)) #Estabelece como o elemento imagem deve ser exibido
 filename_display_elem = sg.Text(filename, size=(80, 3)) #Estabelece como o nome da imagem deve ser exibido
 
 #Coluna que exibe a imagem a seu nome
@@ -57,21 +63,31 @@ while True:
    
     if event == sg.WIN_CLOSED: #Se janela for fechada, sair finalizar o loop
         break
+
     elif event == 'listbox': 
         f = values["listbox"][0]            
         filename = os.path.join(folder, f)  
         i = fnames.index(f)  
-    elif event in ('Zoom Out', 'MouseWheel:Down'):     
-        print("Zoom Out")  
-    elif event in ('Zoom IN', 'MouseWheel:Up'):     
-        print("Zoom In")           
+
+    elif event in ('Zoom Out', 'MouseWheel:Down'):  
+        if zoom > 0.5: 
+            zoom -= 0.1
+        print(zoom)
+        image_elem.update(data=get_img_data(filename, zoom, first=True)) #Atualiza imagem
+
+    elif event in ('Zoom In', 'MouseWheel:Up'):     
+        if zoom < 2.0:
+            zoom += 0.1  
+        print(zoom)
+        image_elem.update(data=get_img_data(filename, zoom, first=True)) #Atualiza imagem
+
     else:
         filename = os.path.join(folder, fnames[i])
 
     if filename.endswith(".dcm"): #Se for DICOM necessitará de conversão
         print("Arquivo dcm")
     else:
-        image_elem.update(data=get_img_data(filename, first=True)) #Atualiza imagem
+        image_elem.update(data=get_img_data(filename, zoom, first=True)) #Atualiza imagem
         filename_display_elem.update(filename) #Atualiza nome da imagem
 
 window.close()
