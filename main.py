@@ -69,13 +69,13 @@ while True:
         filename = os.path.join(folder, f)  
         i = fnames.index(f)  
 
-    elif event in ('Zoom Out', 'MouseWheel:Down'):  
+    elif event in ('Zoom Out'):  
         if zoom > 0.5: 
             zoom -= 0.1
         print(zoom)
         image_elem.update(data=get_img_data(filename, zoom, first=True)) #Atualiza imagem
 
-    elif event in ('Zoom In', 'MouseWheel:Up'):     
+    elif event in ('Zoom In'):     
         if zoom < 2.0:
             zoom += 0.1  
         print(zoom)
