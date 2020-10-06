@@ -49,37 +49,17 @@ class App(Frame):
             h = int(h * 0.9)
         self.im = self.im.resize((w,h))
         self.chg_image()
-    '''
-    def ant(self):
-        self.num_page=self.num_page-1
-        if self.num_page < 0:
-            self.num_page = 0
-        self.im.seek(self.num_page)
-        self.chg_image()
-        self.num_page_tv.set(str(self.num_page+1))
-
-    def prox(self):
-        self.num_page=self.num_page+1
-        try:
-            self.im.seek(self.num_page)
-        except:
-            self.num_page=self.num_page-1
-        self.chg_image()
-        self.num_page_tv.set(str(self.num_page+1)) '''
 
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.master.title('Trab de PI')
-
         self.num_page=0
         self.num_page_tv = StringVar()
-
         fram = Frame(self)
+
         Button(fram, text="Abrir imagem", command=self.open).pack(side=LEFT)
         Button(fram, text="Zoom In", command=self.zoom_in).pack(side=LEFT)
         Button(fram, text="Zoom Out", command=self.zoom_out).pack(side=LEFT)
-        #Button(fram, text="Próx.", command=self.prox).pack(side=LEFT)
-        #Button(fram, text="Ant.", command=self.ant).pack(side=LEFT)
         Label(fram, textvariable=self.num_page_tv).pack(side=LEFT)
         fram.pack(side=TOP, fill=BOTH)
 
