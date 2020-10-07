@@ -1,4 +1,5 @@
 import PIL.Image
+import os
 import pydicom
 import cv2
 import matplotlib.pyplot as plt
@@ -12,39 +13,22 @@ import PIL.ImageTk
 
 class App(Frame):
     def convert_to_png(self, file):
+        """Utiliza matplotlib e pydicom para converter .dcm para .png"""
         filename = file
         dataset = pydicom.dcmread(filename)
-
-        # Normal mode:
-        print()
-        print("Filename.........:", filename)
-        print("Storage type.....:", dataset.SOPClassUID)
-        print()
-
-        pat_name = dataset.PatientName
-        display_name = pat_name.family_name + ", " + pat_name.given_name
-        print("Patient's name...:", display_name)
-        print("Patient id.......:", dataset.PatientID)
-        print("Modality.........:", dataset.Modality)
-        print("Study Date.......:", dataset.StudyDate)
 
         if 'PixelData' in dataset:
             rows = int(dataset.Rows)
             cols = int(dataset.Columns)
             print("Image size.......: {rows:d} x {cols:d}, {size:d} bytes".format(
                 rows=rows, cols=cols, size=len(dataset.PixelData)))
-            if 'PixelSpacing' in dataset:
-                print("Pixel spacing....:", dataset.PixelSpacing)
 
-        # use .get() if not sure the item exists, and want a default value if missing
-        print("Slice location...:", dataset.get('SliceLocation', "(missing)"))
-        # plot the image using matplotlib
-        #plt.imshow(dataset.pixel_array, cmap=plt.cm.bone)
-        #plt.show()
+        plt.imshow(dataset.pixel_array, cmap=plt.cm.bone)
+        plt.show()
         print(dataset.pixel_array)
 
     def chg_image(self):
-        """Atualiza a imagem"""
+        """Atualiza a imagem na tela"""
         if self.im.mode == "1": #Caso imagem for bitmap
             self.img = PIL.ImageTk.BitmapImage(self.im, foreground="white")
         else:
@@ -85,7 +69,19 @@ class App(Frame):
         self.chg_image()
 
     def ler_dir(self):
-        print("Ler diretório")
+        """Le o diretório e 4 subdiretórios para carregas as imagens para a memória"""
+        folder = filedialog.askdirectory()
+
+        for i in range(1,5):
+            subFolder = folder + '/' + str(i)
+            files = os.listdir(subFolder)
+
+            for arquivo in files:
+                img = cv2.imread(subFolder + '/' + arquivo)
+                self.imagens.append(img)
+                
+        cv2.imshow('image',self.imagens[0])
+
 
     def selec_car(self):
         print("Selecionar Características")
@@ -99,6 +95,7 @@ class App(Frame):
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.master.title('Trab de PI')
+        self.imagens = []
 
         #Tela do software
         fram = Frame(self)
