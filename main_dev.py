@@ -25,8 +25,6 @@ class App(Frame):
         if 'PixelData' in dataset:
             rows = int(dataset.Rows)
             cols = int(dataset.Columns)
-            print("Image size.......: {rows:d} x {cols:d}, {size:d} bytes".format(
-                rows=rows, cols=cols, size=len(dataset.PixelData)))
 
         plt.imshow(dataset.pixel_array, cmap=plt.cm.bone)
         plt.show()
@@ -48,10 +46,12 @@ class App(Frame):
                 self.im =  Image.open(self.filename)
                 self.chg_image()
             else: 
-                print('Eh DICOM')
                 self.convert_to_png(self.filename)
 
         #self.chg_image()
+
+    def del_img(self):
+        self.la.config(image='')
 
     def zoom_in(self):
         """Faz zoom in na imagem exibida"""
@@ -75,26 +75,29 @@ class App(Frame):
 
     def ler_dir(self):
         """Le o diretório e 4 subdiretórios para carregas as imagens para a memória"""
-        folder = filedialog.askdirectory()
+        try:
+            folder = filedialog.askdirectory()
 
-        for i in range(1,5):
-            subFolder = folder + '/' + str(i)
-            files = os.listdir(subFolder)
+            for i in range(1,5):
+                subFolder = folder + '/' + str(i)
+                files = os.listdir(subFolder)
 
-            for arquivo in files:
-                img = cv2.imread(subFolder + '/' + arquivo)
-                self.imagens.append(img)
-                
-        cv2.imshow('image',self.imagens[0])
+                for arquivo in files:
+                    img = cv2.imread(subFolder + '/' + arquivo)
+                    self.imagens.append(img)
+                    
+            self.popupmsg(title="ATENÇÃO",msg=str(len(self.imagens)) + " imagens carregadas com sucesso!", geometry="300x80")
+        except:
+            self.popupmsg(title="ATENÇÃO",msg="Erro ao carregar imagens. Verifique o diretório!", geometry="300x80")
 
     def selec_car(self):
-        print("Selecionar Características")
+        self.popupmsg(title="ATENÇÃO",msg="Função não implementada!", geometry="300x80")
 
     def trein_clas(self):
-        print("Treinar classificador")
+        self.popupmsg(title="ATENÇÃO",msg="Função não implementada!", geometry="300x80")
 
     def anal_area(self):
-        print("Analisar área selecionada")
+        self.popupmsg(title="ATENÇÃO",msg="Função não implementada!", geometry="300x80")
 
     def popupmsg(self, title, msg, geometry):
         popup = tk.Toplevel()
@@ -109,13 +112,13 @@ class App(Frame):
     def select_area(self):
         # Alerta ao usuario caso ainda não tenha aberto uma imagem
         if self.filename == None: 
-            tk.messagebox.showwarning(title="ATENÇÃO", message="Selecione uma imagem primeiro")
-            #self.popupmsg(title="ATENÇÃO",msg="Selecione uma imagem primeiro", geometry="300x80")
+            #tk.messagebox.showwarning(title="ATENÇÃO", message="Selecione uma imagem primeiro")
+            self.popupmsg(title="ATENÇÃO",msg="Selecione uma imagem primeiro", geometry="300x80")
             return
         
         if (self.img.width()<=128 and self.img.height()<=128):
-            tk.messagebox.showwarning(title="ATENÇÃO", message="A imagem selecionada é menor que 128x128")
-            #self.popupmsg(title="ATENÇÃO",msg="A imagem selecionada é menor que 128x128",geometry="320x80")
+            #tk.messagebox.showwarning(title="ATENÇÃO", message="A imagem selecionada é menor que 128x128")
+            self.popupmsg(title="ATENÇÃO",msg="A imagem selecionada é menor que 128x128",geometry="320x80")
             return
         
         topx, topy, botx, boty = 0, 0, 0, 0
