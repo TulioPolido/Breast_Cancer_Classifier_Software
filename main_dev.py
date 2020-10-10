@@ -16,7 +16,7 @@ except ImportError:
 
 
 class App(Frame):
-    filename = None
+    filename = ''
     def convert_to_png(self, file):
         """Utiliza matplotlib e pydicom para converter .dcm para .png"""
         filename = file
@@ -51,27 +51,37 @@ class App(Frame):
         #self.chg_image()
 
     def del_img(self):
-        self.la.config(image='')
+        if self.filename != '':
+            self.filename = ''
+            self.la.config(image='',bg="#FFFFFF",width=5,height=5)
+        else:
+            self.popupmsg(title="ATENÇÃO",msg="Não é possível apagar a imagem", geometry="300x80")
 
     def zoom_in(self):
         """Faz zoom in na imagem exibida"""
-        w = self.im.width
-        h = self.im.height
-        if w < 800 or h < 800: #Limite superior de 800px na imagem
-            w = int(w * 1.1)
-            h = int(h * 1.1)
-        self.im = self.im.resize((w,h))
-        self.chg_image()
+        if self.filename != '':
+            w = self.im.width
+            h = self.im.height
+            if w < 800 or h < 800: #Limite superior de 800px na imagem
+                w = int(w * 1.1)
+                h = int(h * 1.1)
+            self.im = self.im.resize((w,h))
+            self.chg_image()
+        else:
+            self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom", geometry="300x80")
 
     def zoom_out(self):
         """Faz zoom out na imagem exibida"""
-        w = self.im.width
-        h = self.im.height
-        if w > 100 or h > 100: #Limite inferior de 100px na imagem
-            w = int(w * 0.9)
-            h = int(h * 0.9)
-        self.im = self.im.resize((w,h))
-        self.chg_image()
+        if self.filename != '':
+            w = self.im.width
+            h = self.im.height
+            if w > 100 or h > 100: #Limite inferior de 100px na imagem
+                w = int(w * 0.9)
+                h = int(h * 0.9)
+            self.im = self.im.resize((w,h))
+            self.chg_image()
+        else:
+            self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom", geometry="300x80")
 
     def ler_dir(self):
         """Le o diretório e 4 subdiretórios para carregas as imagens para a memória"""
@@ -111,7 +121,7 @@ class App(Frame):
 
     def select_area(self):
         # Alerta ao usuario caso ainda não tenha aberto uma imagem
-        if self.filename == None: 
+        if self.filename == '': 
             #tk.messagebox.showwarning(title="ATENÇÃO", message="Selecione uma imagem primeiro")
             self.popupmsg(title="ATENÇÃO",msg="Selecione uma imagem primeiro", geometry="300x80")
             return
@@ -120,7 +130,7 @@ class App(Frame):
             #tk.messagebox.showwarning(title="ATENÇÃO", message="A imagem selecionada é menor que 128x128")
             self.popupmsg(title="ATENÇÃO",msg="A imagem selecionada é menor que 128x128",geometry="320x80")
             return
-        
+
         topx, topy, botx, boty = 0, 0, 0, 0
         rect_id = None
 
@@ -178,7 +188,7 @@ class App(Frame):
         canvas.bind('<Button-1>', get_mouse_posn)
         # O usuario deve dar clique duplo para confirmar corte
         canvas.bind('<Double-Button-1>', confirm_cut) 
-
+        self.la.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
         ############## Fim select area ##############
                
 
