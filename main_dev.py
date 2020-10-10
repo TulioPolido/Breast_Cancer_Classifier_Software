@@ -36,7 +36,7 @@ class App(Frame):
     def open(self):
         """Exibe opção para o usuário selecionar a imagem"""
         self.filename = filedialog.askopenfilename()
-        self.temImagemLabel = True
+        self.temLabel = True
         if self.filename != "":
             if self.filename.endswith('.png') or self.filename.endswith('.tiff'): #Se a imagem for DICOM necessita de conversão
                 self.im =  Image.open(self.filename)
@@ -49,7 +49,7 @@ class App(Frame):
 
     def zoom_in(self):
         """Faz zoom in na imagem exibida"""
-        if self.temImagemLabel:
+        if self.temLabel:
             w = self.im.width
             h = self.im.height
             if w < 800 or h < 800: #Limite superior de 800px na imagem
@@ -57,7 +57,7 @@ class App(Frame):
                 h = int(h * 1.1)
             self.im = self.im.resize((w,h))
             self.chg_image()
-        elif self.temImagemCanvas:
+        elif self.temCanvas:
             print('Zoom no canvas')
         else:
             self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom", geometry="300x80")
@@ -65,7 +65,7 @@ class App(Frame):
 
     def zoom_out(self):
         """Faz zoom out na imagem exibida"""
-        if self.temImagemLabel:
+        if self.temLabel:
             w = self.im.width
             h = self.im.height
             if w > 100 or h > 100: #Limite inferior de 100px na imagem
@@ -73,7 +73,7 @@ class App(Frame):
                 h = int(h * 0.9090)
             self.im = self.im.resize((w,h))
             self.chg_image()
-        elif self.temImagemCanvas:
+        elif self.temCanvas:
             print('Zoom no Canvas')
         else:
             self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom", geometry="300x80")
@@ -109,6 +109,15 @@ class App(Frame):
         self.popupmsg(title="ATENÇÃO",msg="Função não implementada!", geometry="300x80")
     ################### FIM analisar_area ###################
 
+    def deleta_canvas(self):
+        """Deleta o canvas existente"""
+        if self.temCanvas:
+            self.temCanvas = False
+            self.canvas.destroy()
+            print('Deletado')
+        else:
+            print('Canvas inexistente')
+
     def popupmsg(self, title, msg, geometry):
         """Posta uma imagem em popup para o usuário""" 
         popup = tk.Toplevel()
@@ -136,7 +145,7 @@ class App(Frame):
         def popup_request():
             """Pede ao usuário o nome do arquivo a ser salvo""" 
             cropfilename = ''
-            
+
             def set_text(popup):
                 nonlocal cropfilename
                 cropfilename = str(text.get())
@@ -162,9 +171,11 @@ class App(Frame):
            
             if (nameFile.endswith('.png') == False):   #Verificando extensão do arquivo
                 nameFile = nameFile + '.png' 
-            self.popupmsg(title="Seleção de Região",msg="Imagem " + nameFile + " salva com sucesso", geometry="300x80")
             imgCrop.save(nameFile, "PNG")
-            return
+            #self.popupmsg(title="Seleção de Região",msg="Imagem " + nameFile + " salva com sucesso", geometry="300x80")
+            print('Antes de deletar')
+            self.deleta_canvas()
+            print('Depois de deletar')
 
         # Alerta ao usuario caso ainda não tenha aberto uma imagem
         if self.filename == '': 
@@ -185,22 +196,22 @@ class App(Frame):
         self.canvas.pack(expand=True)
         self.canvas.img = img  
         self.canvas.create_image(0, 0, image=img, anchor=tk.NW)
-        self.temImagemCanvas = True
+        self.temCanvas = True
 
         rect_id = self.canvas.create_rectangle(topx, topy, botx, boty, fill='', outline='LimeGreen', width=2.0) # Desenha retangulo verde em cima da imagem
         
         self.canvas.bind('<Button-1>', get_mouse_posn)
         self.canvas.bind('<Double-Button-1>', confirm_cut) # O usuario deve dar clique duplo para confirmar corte
         self.la.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
-        self.temImagemLabel = False
+        self.temLabel = False
     ################### FIM select_area ###################
                
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.master.title('Trabalho de Processamento de Imagens')
         self.imagens = []
-        self.temImagemLabel = False
-        self.temImagemCanvas = False
+        self.temLabel = False
+        self.temCanvas = False
 
         #Tela do software
         fram = Frame(self)
