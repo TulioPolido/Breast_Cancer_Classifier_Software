@@ -114,9 +114,8 @@ class App(Frame):
         if self.temCanvas:
             self.temCanvas = False
             self.canvas.destroy()
-            print('Deletado')
         else:
-            print('Canvas inexistente')
+            self.popupmsg(title="Seleção de Região",msg="Nenhuma imagem selecionada para ser recortada", geometry="300x80")
 
     def popupmsg(self, title, msg, geometry):
         """Posta uma imagem em popup para o usuário""" 
@@ -172,10 +171,7 @@ class App(Frame):
             if (nameFile.endswith('.png') == False):   #Verificando extensão do arquivo
                 nameFile = nameFile + '.png' 
             imgCrop.save(nameFile, "PNG")
-            #self.popupmsg(title="Seleção de Região",msg="Imagem " + nameFile + " salva com sucesso", geometry="300x80")
-            print('Antes de deletar')
-            self.deleta_canvas()
-            print('Depois de deletar')
+            #self.popupmsg(title="Seleção de Região",msg="Imagem " + nameFile + " salva com sucesso", geometry="300x80") #Comentado porque só aparece após a finalização do canvas
 
         # Alerta ao usuario caso ainda não tenha aberto uma imagem
         if self.filename == '': 
@@ -222,6 +218,7 @@ class App(Frame):
         Button(fram, text="Selecionar Características", command=self.selec_car).pack(side=LEFT)
         Button(fram, text="Treinar classificador", command=self.trein_clas).pack(side=LEFT)
         Button(fram, text="Selecionar Região",  command=self.select_area).pack(side=LEFT)
+        Button(fram, text="Finalizar seleção",  command=self.deleta_canvas).pack(side=LEFT)
         Button(fram, text="Analisar área selecionada", command=self.analisar_area).pack(side=LEFT)
         fram.pack(side=TOP, fill=BOTH)
 
