@@ -35,14 +35,17 @@ class App(Frame):
 
     def open(self):
         """Exibe opção para o usuário selecionar a imagem"""
-        self.filename = filedialog.askopenfilename()
-        self.temLabel = True
-        if self.filename != "":
-            if self.filename.endswith('.png') or self.filename.endswith('.tiff'): #Se a imagem for DICOM necessita de conversão
-                self.im =  Image.open(self.filename)
-                self.chg_image()
-            else: 
-                self.convert_to_png(self.filename)
+        if not self.temCanvas: #Se possuir canvas não permite abrir outra imagem
+            self.filename = filedialog.askopenfilename()
+            self.temLabel = True
+            if self.filename != "":
+                if self.filename.endswith('.png') or self.filename.endswith('.tiff'): #Se a imagem for DICOM necessita de conversão
+                    self.im =  Image.open(self.filename)
+                    self.chg_image()
+                else: 
+                    self.convert_to_png(self.filename)
+        else:
+            self.popupmsg(title="ATENÇÃO",msg="Finalize a seleção de região antes de abrir outra imagem!", geometry="400x60")
 
         #self.chg_image()
     ################### FIM open ###################
