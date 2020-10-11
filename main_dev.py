@@ -124,7 +124,7 @@ class App(Frame):
             self.temCanvas = False
             self.canvas.destroy()
         else:
-            self.popupmsg(title="Seleção de Região",msg="Nenhuma imagem selecionada para ser recortada", geometry="300x80")
+            self.popupmsg(title="Seleção de Região",msg="Nenhuma imagem selecionada para ser recortada", geometry="320x80")
 
     def popupmsg(self, title, msg, geometry):
         """Posta uma imagem em popup para o usuário""" 
@@ -198,7 +198,7 @@ class App(Frame):
         topx, topy, botx, boty = 0, 0, 0, 0
         rect_id = None
 
-        if not self.temCanvas:
+        if not self.temCanvas and self.temLabel:
             aux_img = Image.open(self.filename)
             aux_img = aux_img.resize((self.width, self.height))
             img = ImageTk.PhotoImage(aux_img)
@@ -211,6 +211,8 @@ class App(Frame):
             rect_id = self.canvas.create_rectangle(topx, topy, botx, boty, fill='', outline='LimeGreen', width=2) # Desenha retangulo verde em cima da imagem
             self.la.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
             self.temLabel = False
+        elif not self.temLabel:
+            self.popupmsg(title="ATENÇÃO",msg="Selecione uma imagem antes!",geometry="320x80")
         else:
             self.popupmsg(title="ATENÇÃO",msg="Selecione a área a ser recortada com dois cliques",geometry="320x80")
 
