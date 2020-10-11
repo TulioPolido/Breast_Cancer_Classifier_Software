@@ -65,7 +65,7 @@ class App(Frame):
             self.im = self.im.resize((w,h))
             self.chg_image()
         elif self.temCanvas:
-            print('Zoom no canvas')
+            self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom durante a seleção de área!",geometry="320x80")
         else:
             self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom", geometry="300x80")
     ################### FIM zoom_in ###################
@@ -83,7 +83,7 @@ class App(Frame):
             self.im = self.im.resize((w,h))
             self.chg_image()
         elif self.temCanvas:
-            print('Zoom no Canvas')
+            self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom durante a seleção de área!",geometry="320x80")
         else:
             self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom", geometry="300x80")
     ################### FIM zoom_out ###################
