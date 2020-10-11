@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 class App(Frame):
     filename = ''
+    imgCrop = ''
 
     def convert_to_png(self, file):
         """Utiliza matplotlib e pydicom para converter .dcm para .png"""
@@ -139,51 +140,6 @@ class App(Frame):
     ################### FIM popupmsg ###################
 
     def select_area(self):
-        def get_mouse_posn(event):
-            """Pega a posição do mouse ao clique do usuário""" 
-            nonlocal topy, topx, botx, boty
-            nonlocal rect_id
-            topx, topy = event.x, event.y
-            botx = topx + 64
-            boty = topy + 64
-            topx = topx - 64
-            topy = topy - 64
-            self.canvas.coords(rect_id, topx, topy, botx, boty) 
-
-        def popup_request():
-            """Pede ao usuário o nome do arquivo a ser salvo""" 
-            cropfilename = ''
-
-            def set_text(popup):
-                nonlocal cropfilename
-                cropfilename = str(text.get())
-                popup.destroy()
-                return
-
-            popup = tk.Toplevel()
-            popup.wm_title("Nome do arquivo")
-            popup.geometry("280x80")
-            text = StringVar()
-            labelInst = tk.Label(popup, padx=40, text="Digite um nome para o arquivo: ").grid(row=0, column=5)
-            labelText = tk.Entry(popup, textvariable=text).grid(row=1, column=5)
-            B1 = tk.Button(popup, text="Salvar", command =lambda:set_text(popup)).grid(row=4, column=5)
-            popup.mainloop()
-            return str(cropfilename)
-
-        def confirm_cut(event):
-            """Recorta a região de interesse do usuário"""  
-            nonlocal topx, topy, botx, boty
-            border = (topx, topy, botx, boty)
-            aux_img = Image.open(self.filename)
-            aux_img = aux_img.resize((self.width,self.height))
-            imgCrop = aux_img.crop(border)
-            nameFile = popup_request()
-           
-            if (nameFile.endswith('.png') == False):   #Verificando extensão do arquivo
-                nameFile = nameFile + '.png' 
-            imgCrop.save(nameFile, "PNG")
-            #self.popupmsg(title="Seleção de Região",msg="Imagem " + nameFile + " salva com sucesso", geometry="300x80") #Comentado porque só aparece após a finalização do canvas
-
         # Alerta ao usuario caso ainda não tenha aberto uma imagem
         if self.filename == '': 
             #tk.messagebox.showwarning(title="ATENÇÃO", message="Selecione uma imagem primeiro")
@@ -194,6 +150,28 @@ class App(Frame):
             #tk.messagebox.showwarning(title="ATENÇÃO", message="A imagem selecionada é menor que 128x128")
             self.popupmsg(title="ATENÇÃO",msg="A imagem selecionada é menor que 128x128",geometry="320x80")
             return
+
+        def get_mouse_posn(event):
+            """Pega a posição do mouse ao clique do usuário""" 
+            nonlocal topy, topx, botx, boty
+            nonlocal rect_id
+            topx, topy = event.x, event.y
+            botx = topx + 64
+            boty = topy + 64
+            topx = topx - 64
+            topy = topy - 64
+            self.canvas.coords(rect_id, topx, topy, botx, boty) 
+            return 
+
+        def confirm_cut(event):
+            """Recorta a região de interesse do usuário"""  
+            nonlocal topx, topy, botx, boty
+            border = (topx, topy, botx, boty)
+            aux_img = Image.open(self.filename)
+            aux_img = aux_img.resize((self.width,self.height))
+            self.imgCrop = aux_img.crop(border)
+            self.popupmsg(title="Seleção de Região",msg="Imagem selecionada com sucesso", geometry="300x80") #Comentado porque só aparece após a finalização do canvas
+            return 
 
         topx, topy, botx, boty = 0, 0, 0, 0
         rect_id = None
