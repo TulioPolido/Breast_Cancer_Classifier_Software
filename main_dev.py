@@ -115,7 +115,12 @@ class App(Frame):
     ################### FIM trein_clas ###################
 
     def analisar_area(self):
-        self.popupmsg(title="ATENÇÃO",msg="Função não implementada!", geometry="300x80")
+        if self.temCrop:
+            self.la2.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
+            self.temCrop = False
+        else:
+            self.popupmsg(title="ATENÇÃO",msg="Não há área selecionada para ser analisada!", geometry="350x80")
+        #self.popupmsg(title="ATENÇÃO",msg="Função não implementada!", geometry="300x80")
     ################### FIM analisar_area ###################
 
     def deleta_canvas(self):
@@ -171,6 +176,7 @@ class App(Frame):
 
             aux_crop = ImageTk.PhotoImage(self.imgCrop)
             self.la2.config(image=aux_crop,bg='#000000', width=aux_crop.width(), height=aux_crop.height())
+            self.temCrop = True
             self.popupmsg(title="Seleção de Região",msg="Imagem selecionada com sucesso", geometry="300x80")
             return 
 
