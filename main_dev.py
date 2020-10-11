@@ -235,12 +235,13 @@ class App(Frame):
         Button(fram, text="Abrir imagem", command=self.open).pack(side=LEFT)
         Button(fram, text="Zoom In", command=self.zoom_in).pack(side=LEFT)
         Button(fram, text="Zoom Out", command=self.zoom_out).pack(side=LEFT)
-        Button(fram, text="Ler diretório", command=self.ler_dir).pack(side=LEFT)
-        Button(fram, text="Selecionar Características", command=self.selec_car).pack(side=LEFT)
-        Button(fram, text="Treinar classificador", command=self.trein_clas).pack(side=LEFT)
         Button(fram, text="Selecionar Região",  command=self.select_area).pack(side=LEFT)
         Button(fram, text="Finalizar seleção",  command=self.deleta_canvas).pack(side=LEFT)
-        Button(fram, text="Analisar área selecionada", command=self.analisar_area).pack(side=LEFT)
+        Button(fram, text="Analisar área selecionada", command=self.analisar_area,bg='gray').pack(side=LEFT)
+        Button(fram, text="Selecionar Características", command=self.selec_car,bg='gray').pack(side=LEFT)
+        Button(fram, text="Ler diretório", command=self.ler_dir).pack(side=LEFT)
+        Button(fram, text="Treinar classificador", command=self.trein_clas,bg='gray').pack(side=LEFT)
+        
         fram.pack(side=TOP, fill=BOTH)
 
         #Área em que a imagem ficará presente
