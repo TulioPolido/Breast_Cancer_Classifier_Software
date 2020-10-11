@@ -208,7 +208,7 @@ class App(Frame):
             self.canvas.create_image(0, 0, image=img, anchor=tk.NW)
             self.temCanvas = True
 
-            rect_id = self.canvas.create_rectangle(topx, topy, botx, boty, fill='', outline='LimeGreen', width=2.0) # Desenha retangulo verde em cima da imagem
+            rect_id = self.canvas.create_rectangle(topx, topy, botx, boty, fill='', outline='LimeGreen', width=2) # Desenha retangulo verde em cima da imagem
             self.la.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
             self.temLabel = False
         else:
