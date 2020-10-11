@@ -174,7 +174,9 @@ class App(Frame):
             """Recorta a região de interesse do usuário"""  
             nonlocal topx, topy, botx, boty
             border = (topx, topy, botx, boty)
-            imgCrop = Image.open(self.filename).crop(border)
+            aux_img = Image.open(self.filename)
+            aux_img = aux_img.resize((self.width,self.height))
+            imgCrop = aux_img.crop(border)
             nameFile = popup_request()
            
             if (nameFile.endswith('.png') == False):   #Verificando extensão do arquivo
