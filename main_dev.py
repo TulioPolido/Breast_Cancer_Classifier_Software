@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 
 class App(Frame):
     filename = ''
-    imgCrop = ''
 
     def convert_to_png(self, file):
         """Utiliza matplotlib e pydicom para converter .dcm para .png"""
@@ -142,12 +141,10 @@ class App(Frame):
     def select_area(self):
         # Alerta ao usuario caso ainda não tenha aberto uma imagem
         if self.filename == '': 
-            #tk.messagebox.showwarning(title="ATENÇÃO", message="Selecione uma imagem primeiro")
             self.popupmsg(title="ATENÇÃO",msg="Selecione uma imagem primeiro", geometry="300x80")
             return
         
         if (self.img.width()<=128 and self.img.height()<=128):
-            #tk.messagebox.showwarning(title="ATENÇÃO", message="A imagem selecionada é menor que 128x128")
             self.popupmsg(title="ATENÇÃO",msg="A imagem selecionada é menor que 128x128",geometry="320x80")
             return
 
@@ -169,8 +166,12 @@ class App(Frame):
             border = (topx, topy, botx, boty)
             aux_img = Image.open(self.filename)
             aux_img = aux_img.resize((self.width,self.height))
+
             self.imgCrop = aux_img.crop(border)
-            self.popupmsg(title="Seleção de Região",msg="Imagem selecionada com sucesso", geometry="300x80") #Comentado porque só aparece após a finalização do canvas
+
+            aux_crop = ImageTk.PhotoImage(self.imgCrop)
+            self.la2.config(image=aux_crop,bg='#000000', width=aux_crop.width(), height=aux_crop.height())
+            self.popupmsg(title="Seleção de Região",msg="Imagem selecionada com sucesso", geometry="300x80")
             return 
 
         topx, topy, botx, boty = 0, 0, 0, 0
@@ -205,8 +206,11 @@ class App(Frame):
         self.imagens = []
         self.temLabel = False
         self.temCanvas = False
+        self.temCrop = False
         self.height = 0
         self.width = 0
+        self.imgCrop = None
+
 
         #Tela do software
         fram = Frame(self)
@@ -225,6 +229,9 @@ class App(Frame):
         #Área em que a imagem ficará presente
         self.la = Label(self)
         self.la.pack()
+
+        self.la2 = Label(self)
+        self.la2.pack(side=BOTTOM)
 
         self.pack()
 
