@@ -197,7 +197,9 @@ class App(Frame):
         rect_id = None
 
         if not self.temCanvas:
-            img = ImageTk.PhotoImage(Image.open(self.filename))
+            aux_img = Image.open(self.filename)
+            aux_img = aux_img.resize((self.width, self.height))
+            img = ImageTk.PhotoImage(aux_img)
             self.canvas = tk.Canvas(self.la, width=img.width(), height=img.height(), borderwidth=0, highlightthickness=0)
             self.canvas.pack(expand=True)
             self.canvas.img = img  
