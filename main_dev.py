@@ -41,6 +41,8 @@ class App(Frame):
             if self.filename != "":
                 if self.filename.endswith('.png') or self.filename.endswith('.tiff'): #Se a imagem for DICOM necessita de conversão
                     self.im =  Image.open(self.filename)
+                    self.width = self.im.width
+                    self.height = self.im.height
                     self.chg_image()
                 else: 
                     self.convert_to_png(self.filename)
@@ -58,6 +60,8 @@ class App(Frame):
             if w < 800 or h < 800: #Limite superior de 800px na imagem
                 w = int(w * 1.1)
                 h = int(h * 1.1)
+            self.width = w
+            self.height = h
             self.im = self.im.resize((w,h))
             self.chg_image()
         elif self.temCanvas:
@@ -74,6 +78,8 @@ class App(Frame):
             if w > 100 or h > 100: #Limite inferior de 100px na imagem
                 w = int(w * 0.9090)
                 h = int(h * 0.9090)
+            self.width = w
+            self.height = h
             self.im = self.im.resize((w,h))
             self.chg_image()
         elif self.temCanvas:
@@ -83,7 +89,7 @@ class App(Frame):
     ################### FIM zoom_out ###################
 
     def ler_dir(self):
-        """Le o diretório e 4 subdiretórios para carregas as imagens para a memória"""
+        """Le o diretório e 4 subdiretórios para carregar as imagens para a memória"""
         try:
             folder = filedialog.askdirectory()
 
@@ -211,6 +217,8 @@ class App(Frame):
         self.imagens = []
         self.temLabel = False
         self.temCanvas = False
+        self.height = 0
+        self.width = 0
 
         #Tela do software
         fram = Frame(self)
