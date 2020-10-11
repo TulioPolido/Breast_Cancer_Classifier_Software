@@ -190,19 +190,23 @@ class App(Frame):
         topx, topy, botx, boty = 0, 0, 0, 0
         rect_id = None
 
-        img = ImageTk.PhotoImage(Image.open(self.filename))
-        self.canvas = tk.Canvas(self.la, width=img.width(), height=img.height(), borderwidth=0, highlightthickness=0)
-        self.canvas.pack(expand=True)
-        self.canvas.img = img  
-        self.canvas.create_image(0, 0, image=img, anchor=tk.NW)
-        self.temCanvas = True
+        if not self.temCanvas:
+            img = ImageTk.PhotoImage(Image.open(self.filename))
+            self.canvas = tk.Canvas(self.la, width=img.width(), height=img.height(), borderwidth=0, highlightthickness=0)
+            self.canvas.pack(expand=True)
+            self.canvas.img = img  
+            self.canvas.create_image(0, 0, image=img, anchor=tk.NW)
+            self.temCanvas = True
 
-        rect_id = self.canvas.create_rectangle(topx, topy, botx, boty, fill='', outline='LimeGreen', width=2.0) # Desenha retangulo verde em cima da imagem
-        
+            rect_id = self.canvas.create_rectangle(topx, topy, botx, boty, fill='', outline='LimeGreen', width=2.0) # Desenha retangulo verde em cima da imagem
+            self.la.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
+            self.temLabel = False
+        else:
+            self.popupmsg(title="ATENÇÃO",msg="Selecione a área a ser recortada com dois cliques",geometry="320x80")
+
         self.canvas.bind('<Button-1>', get_mouse_posn)
         self.canvas.bind('<Double-Button-1>', confirm_cut) # O usuario deve dar clique duplo para confirmar corte
-        self.la.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
-        self.temLabel = False
+        
     ################### FIM select_area ###################
                
     def __init__(self, master=None):
