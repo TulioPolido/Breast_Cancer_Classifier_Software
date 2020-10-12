@@ -44,6 +44,7 @@ class App(Frame):
             if self.filename != "":
                 if self.filename.endswith('.png') or self.filename.endswith('.tiff'): #Se a imagem for DICOM necessita de conversão
                     self.im =  Image.open(self.filename)
+                    self.img_atual =  Image.open(self.filename)
                     self.width = self.im.width
                     self.height = self.im.height
                     self.chg_image()
@@ -51,6 +52,7 @@ class App(Frame):
                     self.convert_to_png(self.filename)
                     self.filename = './dicom.png'
                     self.im =  Image.open(self.filename)
+                    self.img_atual =  Image.open(self.filename)
                     self.width = self.im.width
                     self.height = self.im.height
                     self.chg_image()
@@ -71,7 +73,7 @@ class App(Frame):
                 h = int(h * 1.1)
             self.width = w
             self.height = h
-            self.im = self.im.resize((w,h))
+            self.im = self.img_atual.resize((w,h))
             self.chg_image()
         elif self.temCanvas:
             self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom durante a seleção de área!",geometry="320x80")
@@ -89,7 +91,7 @@ class App(Frame):
                 h = int(h * 0.9090)
             self.width = w
             self.height = h
-            self.im = self.im.resize((w,h))
+            self.im = self.img_atual.resize((w,h))
             self.chg_image()
         elif self.temCanvas:
             self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom durante a seleção de área!",geometry="320x80")
@@ -219,6 +221,7 @@ class App(Frame):
         self.height = 0
         self.width = 0
         self.imgCrop = None
+        self.img_atual = None
 
 
         #Tela do software
