@@ -20,8 +20,10 @@ class App(Frame):
             cols = int(dataset.Columns)
 
         plt.imshow(dataset.pixel_array, cmap=plt.cm.bone)
-        plt.show()
-        print(dataset.pixel_array)
+        
+        plt.axis('off')
+        plt.savefig('./dicom.png', format='png', dpi=200, transparent=True, pad_inches=0, bbox_inches='tight')
+        
     ################### FIM convert_to_png ###################
 
     def chg_image(self):
