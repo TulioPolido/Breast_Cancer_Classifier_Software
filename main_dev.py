@@ -6,6 +6,7 @@ import os
 import pydicom
 import cv2
 import matplotlib.pyplot as plt
+import tkinter.messagebox as msgbx
 
 class App(Frame):
     filename = ''
@@ -48,6 +49,12 @@ class App(Frame):
                     self.chg_image()
                 else: 
                     self.convert_to_png(self.filename)
+                    self.filename = './dicom.png'
+                    self.im =  Image.open(self.filename)
+                    self.width = self.im.width
+                    self.height = self.im.height
+                    self.chg_image()
+
         else:
             self.popupmsg(title="ATENÇÃO",msg="Finalize a seleção de região antes de abrir outra imagem!", geometry="400x60")
 
@@ -135,7 +142,7 @@ class App(Frame):
 
     def popupmsg(self, title, msg, geometry):
         """Posta uma imagem em popup para o usuário""" 
-        tk.messagebox.showinfo(title=title, message=msg)
+        msgbx.showinfo(title=title, message=msg)
         return
     ################### FIM popupmsg ###################
 
