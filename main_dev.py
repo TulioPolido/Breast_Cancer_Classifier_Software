@@ -133,14 +133,8 @@ class App(Frame):
 
     def popupmsg(self, title, msg, geometry):
         """Posta uma imagem em popup para o usuário""" 
-        popup = tk.Toplevel()
-        popup.wm_title(title)
-        popup.geometry(geometry)
-        label = tk.Label(popup, text=msg)
-        label.pack(side="top", fill="x", pady=10)
-        B1 = tk.Button(popup, text="OK", command = popup.destroy)
-        B1.pack()
-        popup.mainloop()
+        tk.messagebox.showinfo(title=title, message=msg)
+        return
     ################### FIM popupmsg ###################
 
     def select_area(self):
