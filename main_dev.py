@@ -58,8 +58,8 @@ class App(Frame):
                     self.chg_image()
 
         else:
-            self.popupmsg(title="ATENÇÃO",msg="Finalize a seleção de região antes de abrir outra imagem!", geometry="400x60")
-
+            msgbx.showinfo(title="ATENÇÃO", message="Finalize a seleção de região antes de abrir outra imagem!")
+            
         #self.chg_image()
     ################### FIM open ###################
 
@@ -76,9 +76,9 @@ class App(Frame):
             self.im = self.img_atual.resize((w,h))
             self.chg_image()
         elif self.temCanvas:
-            self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom durante a seleção de área!",geometry="320x80")
+            msgbx.showinfo(title="ATENÇÃO", message="Não é possível dar zoom durante a seleção de área!")
         else:
-            self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom", geometry="300x80")
+            msgbx.showinfo(title="ATENÇÃO", message="Não é possível dar zoom")
     ################### FIM zoom_in ###################
 
     def zoom_out(self):
@@ -94,9 +94,9 @@ class App(Frame):
             self.im = self.img_atual.resize((w,h))
             self.chg_image()
         elif self.temCanvas:
-            self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom durante a seleção de área!",geometry="320x80")
+            msgbx.showinfo(title="ATENÇÃO", message="Não é possível dar zoom durante a seleção de área!")
         else:
-            self.popupmsg(title="ATENÇÃO",msg="Não é possível dar zoom", geometry="300x80")
+            msgbx.showinfo(title="ATENÇÃO", message="Não é possível dar zoom")
     ################### FIM zoom_out ###################
 
     def ler_dir(self):
@@ -112,17 +112,17 @@ class App(Frame):
                     img = cv2.imread(subFolder + '/' + arquivo)
                     self.imagens.append(img)
                     
-            self.popupmsg(title="ATENÇÃO",msg=str(len(self.imagens)) + " imagens carregadas com sucesso!", geometry="300x80")
+            msgbx.showinfo(title="ATENÇÃO", message=str(len(self.imagens)) + " imagens carregadas com sucesso!")
         except:
-            self.popupmsg(title="ATENÇÃO",msg="Erro ao carregar imagens. Verifique o diretório!", geometry="300x80")
+            msgbx.showinfo(title="ATENÇÃO", message="Erro ao carregar imagens. Verifique o diretório!")
     ################### FIM ler_dir ###################
 
     def selec_car(self):
-        self.popupmsg(title="ATENÇÃO",msg="Função não implementada!", geometry="300x80")
+        msgbx.showinfo(title="ATENÇÃO", message="Função não implementada!")
     ################### FIM select_car ###################
 
     def trein_clas(self):
-        self.popupmsg(title="ATENÇÃO",msg="Função não implementada!", geometry="300x80")
+        msgbx.showinfo(title="ATENÇÃO", message="Função não implementada!")
     ################### FIM trein_clas ###################
 
     def analisar_area(self):
@@ -130,8 +130,8 @@ class App(Frame):
             self.la2.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
             self.temCrop = False
         else:
-            self.popupmsg(title="ATENÇÃO",msg="Não há área selecionada para ser analisada!", geometry="350x80")
-        #self.popupmsg(title="ATENÇÃO",msg="Função não implementada!", geometry="300x80")
+            msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")
+            
     ################### FIM analisar_area ###################
 
     def deleta_canvas(self):
@@ -140,22 +140,30 @@ class App(Frame):
             self.temCanvas = False
             self.canvas.destroy()
         else:
-            self.popupmsg(title="Seleção de Região",msg="Nenhuma imagem selecionada para ser recortada", geometry="320x80")
+            msgbx.showinfo(title="Seleção de Região", message="Nenhuma imagem selecionada para ser recortada")
 
     def popupmsg(self, title, msg, geometry):
         """Posta uma imagem em popup para o usuário""" 
-        msgbx.showinfo(title=title, message=msg)
+        #msgbx.showinfo(title=title, message=msg)
+        popup = tk.Toplevel()
+        popup.wm_title(title)
+        popup.geometry(geometry)
+        label = tk.Label(popup, text=msg)
+        label.pack(side="top", fill="x", pady=10)
+        B1 = tk.Button(popup, text="OK", command = popup.destroy)
+        B1.pack()
+        popup.mainloop()
         return
     ################### FIM popupmsg ###################
 
     def select_area(self):
         # Alerta ao usuario caso ainda não tenha aberto uma imagem
         if self.filename == '': 
-            self.popupmsg(title="ATENÇÃO",msg="Selecione uma imagem primeiro", geometry="300x80")
+            msgbx.showinfo(title="ATENÇÃO", message="Selecione uma imagem primeiro")
             return
         
         if (self.img.width()<=128 and self.img.height()<=128):
-            self.popupmsg(title="ATENÇÃO",msg="A imagem selecionada é menor que 128x128",geometry="320x80")
+            msgbx.showinfo(title="ATENÇÃO", message="A imagem selecionada é menor que 128x128")
             return
 
         def get_mouse_posn(event):
@@ -180,7 +188,7 @@ class App(Frame):
             self.imgCrop = aux_img.crop(border)
 
             aux_crop = ImageTk.PhotoImage(self.imgCrop)
-            self.la2.config(image=aux_crop,bg='#000000', width=aux_crop.width(), height=aux_crop.height())
+            self.la2.config(image=aux_crop, bg='#000000', width=aux_crop.width(), height=aux_crop.height())
             self.temCrop = True
             self.popupmsg(title="Seleção de Região",msg="Imagem selecionada com sucesso", geometry="300x80")
             return 
@@ -202,10 +210,10 @@ class App(Frame):
             self.la.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
             self.temLabel = False
         elif not self.temLabel:
-            self.popupmsg(title="ATENÇÃO",msg="Selecione uma imagem antes!",geometry="320x80")
+            msgbx.showinfo(title="ATENÇÃO", message="Selecione uma imagem antes!")
         else:
-            self.popupmsg(title="ATENÇÃO",msg="Selecione a área a ser recortada com dois cliques",geometry="320x80")
-
+            msgbx.showinfo(title="ATENÇÃO", message="Selecione a área a ser recortada com dois cliques")
+            
         self.canvas.bind('<Button-1>', get_mouse_posn)
         self.canvas.bind('<Double-Button-1>', confirm_cut) # O usuario deve dar clique duplo para confirmar corte
         
