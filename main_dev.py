@@ -127,7 +127,7 @@ class App(Frame):
 
     def analisar_area(self):
         if self.temCrop:
-            self.la2.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
+            self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
             self.temCrop = False
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")
@@ -138,6 +138,7 @@ class App(Frame):
         """Deleta o canvas existente"""
         if self.temCanvas:
             self.temCanvas = False
+            self.canvas.delete("all")
             self.canvas.destroy()
         else:
             msgbx.showinfo(title="Seleção de Região", message="Nenhuma imagem selecionada para ser recortada")
@@ -207,7 +208,7 @@ class App(Frame):
             self.temCanvas = True
 
             rect_id = self.canvas.create_rectangle(topx, topy, botx, boty, fill='', outline='LimeGreen', width=2) # Desenha retangulo verde em cima da imagem
-            self.la.config(image='',bg="#FFFFFF",width=5,height=5) #Remove a imagem atras do canvas
+            self.la.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
             self.temLabel = False
         elif not self.temLabel:
             msgbx.showinfo(title="ATENÇÃO", message="Selecione uma imagem antes!")
@@ -256,4 +257,4 @@ class App(Frame):
         self.pack()
 
 if __name__ == "__main__":
-    app = App(); app.mainloop()
+    app = App(); app.configure(bg='white'); app.mainloop()
