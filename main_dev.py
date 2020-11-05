@@ -221,6 +221,7 @@ class App(Frame):
     ################### FIM select_area ###################
                
     def __init__(self, master=None):
+        #variaveis globais
         Frame.__init__(self, master)
         self.master.title('Trabalho de Processamento de Imagens')
         self.imagens = []
@@ -251,6 +252,7 @@ class App(Frame):
         self.la = Label(self)
         self.la.pack()
 
+        #Área que o recorte ficará presente
         self.la2 = Label(self)
         self.la2.pack(side=BOTTOM)
 
