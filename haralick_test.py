@@ -19,7 +19,7 @@ def extract_features(image):
 
         # take the mean of it and return it
         ht_mean = textures.mean(axis=0)
-        return ht_mean
+        return textures[0]
 
 # loop over the training dataset
 print ("[STATUS] Started extracting haralick textures..")
@@ -58,7 +58,7 @@ print ("[STATUS] Fitting data/label to model..")
 clf_svm.fit(train_features, train_labels)
 
 # loop over the test images
-test_path = "./imagens/1/p_d_left_cc(108).png"
+test_path = "./imagens/1/p_d_left_cc(12).png"
 #for file in glob.glob(test_path + "/*.png"):
 
 # read the input image
