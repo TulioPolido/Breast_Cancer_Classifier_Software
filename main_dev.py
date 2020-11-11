@@ -32,36 +32,35 @@ class App(Frame):
         return final
     ################### FIM reamostragemCinza ###################
 
-    def Haralick(self, caracteristicas):
-        #Usar mahotas
+    def Haralick(self, image, caracteristicas):
+
+        ##LEMBRAR remover teste da main ao finalizar
         resultado = 0
-        image = cv2.imread("./teste/file_example_TIFF_1MB.tiff")
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         final = gray/8
         final = final.astype(int)
         
         #Calcula descritores de Haralick para cada direcao da matriz de coocorrencia 
         features = mt.features.haralick(final)
-
-        '''
+        print(features)
+        
         #Somar a coluna para a caracteristica escolhida
         if(caracteristicas[0]):
-            #somar homogeneidade
-            resultado = features[0][1] + features[1][1] + features[2][1] + features[3][1]
+            ###somar homogeneidade
+            resultado = (features[0][1] + features[1][1] + features[2][1] + features[3][1])/4
             
         elif(caracteristicas[1]):
             #somar entropia
-            resultado = features[0][8] + features[1][8] + features[2][8] + features[3][8]
+            resultado = (features[0][8] + features[1][8] + features[2][8] + features[3][8])/4
             
         elif(caracteristicas[2]):
             #somar energia
-            resultado = features[0][0] + features[1][0] + features[2][0] + features[3][0]
+            resultado = (features[0][0] + features[1][0] + features[2][0] + features[3][0])/4
             
         elif(caracteristicas[3]):
             #somar contraste
-            resultado = features[0][1] + features[1][1] + features[2][1] + features[3][1]
+            resultado = (features[0][1] + features[1][1] + features[2][1] + features[3][1])/4
             
-        '''
         return resultado
     ################### FIM Haralick ###################
 
@@ -312,9 +311,9 @@ class App(Frame):
 
         self.pack()
 
-
-        caracteristicas = [True,True,False,False]
-        self.Haralick(caracteristicas)
+        image = cv2.imread("./teste/file_example_TIFF_1MB.tiff")
+        caracteristicas = [True,False,False,False]
+        self.Haralick(image,caracteristicas)
 
 if __name__ == "__main__":
     app = App(); app.configure(bg='white'); app.mainloop()
