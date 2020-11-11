@@ -11,6 +11,32 @@ import tkinter.messagebox as msgbx
 class App(Frame):
     filename = ''
 
+    def reamostragemCinza(self):
+        #dividir todos pontos por 8 e transormar em escala de cinza
+        image = cv2.imread("./teste/file_example_TIFF_1MB.tiff")
+        print(image)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        print(gray)
+        gray = gray/8
+        print(gray)
+        '''
+        image = cv2.imread(self.imgCrop)
+        print(self.imgCrop)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        print(image)
+        '''
+        return image
+    ################### FIM reamostragemCinza ###################
+
+    def Haralick(self, caracteristicas):
+        #Usar mahotas
+        #Calcular a matriz de coocorrencia 
+        #Somar a coluna para a caracteristica escolhida(equivalente a matriz cooc circular)
+        return 0
+    ################### FIM Haralick ###################
+
+
     def convert_to_png(self, file):
         """Utiliza matplotlib e pydicom para converter .dcm para .png"""
         filename = file
@@ -23,8 +49,7 @@ class App(Frame):
         plt.imshow(dataset.pixel_array, cmap=plt.cm.bone)
         
         plt.axis('off')
-        plt.savefig('./dicom.png', format='png', dpi=200, transparent=True, pad_inches=0, bbox_inches='tight')
-        
+        plt.savefig('./dicom.png', format='png', dpi=200, transparent=True, pad_inches=0, bbox_inches='tight')   
     ################### FIM convert_to_png ###################
 
     def chg_image(self):
@@ -129,9 +154,10 @@ class App(Frame):
         if self.temCrop:
             self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
             self.temCrop = False
+            self.reamostragemCinza()
+
         else:
-            msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")
-            
+            msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")    
     ################### FIM analisar_area ###################
 
     def deleta_canvas(self):
@@ -142,6 +168,7 @@ class App(Frame):
             self.canvas.destroy()
         else:
             msgbx.showinfo(title="Seleção de Região", message="Nenhuma imagem selecionada para ser recortada")
+    ################### FIM deleta_canvas ###################
 
     def popupmsg(self, title, msg, geometry):
         """Posta uma imagem em popup para o usuário""" 
@@ -216,8 +243,7 @@ class App(Frame):
             msgbx.showinfo(title="ATENÇÃO", message="Selecione a área a ser recortada com dois cliques")
             
         self.canvas.bind('<Button-1>', get_mouse_posn)
-        self.canvas.bind('<Double-Button-1>', confirm_cut) # O usuario deve dar clique duplo para confirmar corte
-        
+        self.canvas.bind('<Double-Button-1>', confirm_cut) # O usuario deve dar clique duplo para confirmar corte   
     ################### FIM select_area ###################
                
     def __init__(self, master=None):
