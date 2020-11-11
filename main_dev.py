@@ -38,27 +38,29 @@ class App(Frame):
         image = cv2.imread("./teste/file_example_TIFF_1MB.tiff")
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         final = gray/8
-        print(final)
-        final.astype(int)
-        print(final)
+        final = final.astype(int)
         
-        #Calcular a matriz de coocorrencia 
-        #matrizes = mt.features.haralick(final)
-        #print(matrizes)
+        #Calcula descritores de Haralick para cada direcao da matriz de coocorrencia 
+        features = mt.features.haralick(final)
+
         '''
-        #Somar a coluna para a caracteristica escolhida(equivalente a matriz cooc circular)
+        #Somar a coluna para a caracteristica escolhida
         if(caracteristicas[0]):
-            resultado += 0
             #somar homogeneidade
-        if(caracteristicas[1]):
-            resultado += 0
+            resultado = features[0][1] + features[1][1] + features[2][1] + features[3][1]
+            
+        elif(caracteristicas[1]):
             #somar entropia
-        if(caracteristicas[2]):
-            resultado += 0
+            resultado = features[0][8] + features[1][8] + features[2][8] + features[3][8]
+            
+        elif(caracteristicas[2]):
             #somar energia
-        if(caracteristicas[3]):
-            resultado += 0
+            resultado = features[0][0] + features[1][0] + features[2][0] + features[3][0]
+            
+        elif(caracteristicas[3]):
             #somar contraste
+            resultado = features[0][1] + features[1][1] + features[2][1] + features[3][1]
+            
         '''
         return resultado
     ################### FIM Haralick ###################
