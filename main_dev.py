@@ -4,9 +4,12 @@ from tkinter import *
 from PIL import Image, ImageTk
 import os
 import pydicom
+import math
 import cv2
+import mahotas as mt
 import matplotlib.pyplot as plt
 import tkinter.messagebox as msgbx
+import numpy as np
 
 class App(Frame):
     filename = ''
@@ -26,14 +29,36 @@ class App(Frame):
 
         print(image)
         '''
-        return image
+        return final
     ################### FIM reamostragemCinza ###################
 
-    def Haralick(self, caracteristicas):
-        #Usar mahotas
-        #Calcular a matriz de coocorrencia 
-        #Somar a coluna para a caracteristica escolhida(equivalente a matriz cooc circular)
-        return 0
+    def Haralick(self, image, caracteristicas):
+        resultado = 0
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        final = gray/8
+        final = final.astype(int)
+        
+        #Calcula descritores de Haralick para cada direcao da matriz de coocorrencia 
+        features = mt.features.haralick(final)
+        
+        #Media da coluna para a caracteristica escolhida
+        if(caracteristicas[0]):
+            ###somar homogeneidade
+            resultado = (features[0][4] + features[1][4] + features[2][4] + features[3][4])/4
+            
+        elif(caracteristicas[1]):
+            #somar entropia
+            resultado = (features[0][8] + features[1][8] + features[2][8] + features[3][8])/4
+            
+        elif(caracteristicas[2]):
+            #somar energia
+            resultado = (features[0][0] + features[1][0] + features[2][0] + features[3][0])/4
+            
+        elif(caracteristicas[3]):
+            #somar contraste
+            resultado = (features[0][1] + features[1][1] + features[2][1] + features[3][1])/4
+            
+        return resultado
     ################### FIM Haralick ###################
 
 
@@ -154,8 +179,6 @@ class App(Frame):
         if self.temCrop:
             self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
             self.temCrop = False
-            self.reamostragemCinza()
-
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")    
     ################### FIM analisar_area ###################
