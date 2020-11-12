@@ -33,7 +33,6 @@ class App(Frame):
     ################### FIM reamostragemCinza ###################
 
     def Haralick(self, image, caracteristicas):
-        ####REMOVER TESTES ANTES DE COMITAR
         resultado = []
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         final = gray/8
@@ -313,10 +312,11 @@ class App(Frame):
 
         self.pack()
 
-        imagem = cv2.imread('./teste/file_example_TIFF_1MB.tiff')
-        caracteristicas = [True,False,False,False]
-        resp = self.Haralick(imagem,caracteristicas)
-        print(resp)
+        ##Linhas de teste de Haralick
+        #imagem = cv2.imread('./teste/file_example_TIFF_1MB.tiff')
+        #caracteristicas = [True,False,False,False]
+        #resp = self.Haralick(imagem,caracteristicas)
+        #print(resp)
 
 if __name__ == "__main__":
     app = App(); app.configure(bg='white'); app.mainloop()
