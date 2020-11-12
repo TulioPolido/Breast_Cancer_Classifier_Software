@@ -42,12 +42,11 @@ class App(Frame):
         
         #Calcula descritores de Haralick para cada direcao da matriz de coocorrencia 
         features = mt.features.haralick(final)
-        print(features)
         
         #Somar a coluna para a caracteristica escolhida
         if(caracteristicas[0]):
             ###somar homogeneidade
-            resultado = (features[0][1] + features[1][1] + features[2][1] + features[3][1])/4
+            resultado = (features[0][4] + features[1][4] + features[2][4] + features[3][4])/4
             
         elif(caracteristicas[1]):
             #somar entropia
@@ -313,7 +312,8 @@ class App(Frame):
 
         image = cv2.imread("./teste/file_example_TIFF_1MB.tiff")
         caracteristicas = [True,False,False,False]
-        self.Haralick(image,caracteristicas)
+        resp = self.Haralick(image,caracteristicas)
+        print(resp)
 
 if __name__ == "__main__":
     app = App(); app.configure(bg='white'); app.mainloop()
