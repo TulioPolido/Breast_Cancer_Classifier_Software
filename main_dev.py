@@ -20,8 +20,8 @@ class App(Frame):
         print(image)
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         print(gray)
-        final = gray/8
-        print(final)
+        gray = gray/8
+        print(gray)
         '''
         image = cv2.imread(self.imgCrop)
         print(self.imgCrop)
@@ -179,7 +179,6 @@ class App(Frame):
         if self.temCrop:
             self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
             self.temCrop = False
-
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")    
     ################### FIM analisar_area ###################
