@@ -33,8 +33,6 @@ class App(Frame):
     ################### FIM reamostragemCinza ###################
 
     def Haralick(self, image, caracteristicas):
-
-        ##LEMBRAR remover teste da main ao finalizar
         resultado = 0
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         final = gray/8
@@ -43,7 +41,7 @@ class App(Frame):
         #Calcula descritores de Haralick para cada direcao da matriz de coocorrencia 
         features = mt.features.haralick(final)
         
-        #Somar a coluna para a caracteristica escolhida
+        #Media da coluna para a caracteristica escolhida
         if(caracteristicas[0]):
             ###somar homogeneidade
             resultado = (features[0][4] + features[1][4] + features[2][4] + features[3][4])/4
@@ -309,11 +307,6 @@ class App(Frame):
         self.la2.pack(side=BOTTOM)
 
         self.pack()
-
-        image = cv2.imread("./teste/file_example_TIFF_1MB.tiff")
-        caracteristicas = [True,False,False,False]
-        resp = self.Haralick(image,caracteristicas)
-        print(resp)
 
 if __name__ == "__main__":
     app = App(); app.configure(bg='white'); app.mainloop()
