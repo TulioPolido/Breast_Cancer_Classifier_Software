@@ -14,23 +14,23 @@ import numpy as np
 class App(Frame):
     filename = ''
 
-    def reamostragemCinza(self):
-        #dividir todos pontos por 8 e transormar em escala de cinza
-        image = cv2.imread(".crop.png", 0) #Imagem em escala de cinza
-        #Reamostragem
-        gray = image/8
-        return gray
-    ################### FIM reamostragemCinza ###################
+    def Hu(self, image):
+        """Calcula os momentos de Hu para a imagem e retorna uma lista com os resultados"""
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #converte para cinza
+        final = gray/8 #rescalona os valores para o teto de 32
+        final = final.astype(int) #converte para inteiros
+        _,gray = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY) #converte para binario
 
-    def Hu(self):
-        resultado = []
+        moments = cv2.moments(gray) #calcula os momentos da imagem
+        huMoments = cv2.HuMoments(moments) #calcula os momentos de Hu
 
-        return resultado
+        return huMoments
     ################### FIM Hu ###################
     
     def Haralick(self, image, caracteristicas):
+        """Calcula as propriedades de Haralick da imagem e retorna um array com os resultados"""
         resultado = []
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #converte para cinza
         final = gray/8
         final = final.astype(int)
 
@@ -61,7 +61,6 @@ class App(Frame):
             
         return resultado
     ################### FIM Haralick ###################
-
 
     def convert_to_png(self, file):
         """Utiliza matplotlib e pydicom para converter .dcm para .png"""
@@ -177,9 +176,20 @@ class App(Frame):
     ################### FIM trein_clas ###################
 
     def analisar_area(self):
+        """Analisa a area recortada pelo usuario"""
         if self.temCrop:
             self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
             self.temCrop = False
+
+            image = cv2.imread(".crop.png")
+            
+            har = self.Haralick(image,caracteristicas=[True,False,False,False])
+            print(har)
+
+            hu = self.Hu(image)
+            print(hu)
+
+            #conferir se o classificador foi treinado e analisar a imagem
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")    
     ################### FIM analisar_area ###################
@@ -209,6 +219,7 @@ class App(Frame):
     ################### FIM popupmsg ###################
 
     def select_area(self):
+        """Permite a selecao de uma area 128x128 na imagem aberta e a salva"""
         # Alerta ao usuario caso ainda não tenha aberto uma imagem
         if self.filename == '': 
             msgbx.showinfo(title="ATENÇÃO", message="Selecione uma imagem primeiro")
@@ -274,12 +285,13 @@ class App(Frame):
     ################### FIM select_area ###################
                
     def __init__(self, master=None):
-        #variaveis globais
         Frame.__init__(self, master)
         self.master.title('Trabalho de Processamento de Imagens')
         #Atributo zoomed inicia janela em modo tela cheia
         #self.master.attributes('-zoomed', True)
-        self.master.attributes('-fullscreen', True)
+        #self.master.attributes('-fullscreen', True)
+
+        #Variaveis da classe
         self.imagens = []
         self.temLabel = False
         self.temCanvas = False
@@ -313,12 +325,6 @@ class App(Frame):
         self.la2.pack(side=BOTTOM)
 
         self.pack()
-
-        ##Linhas de teste de Haralick
-        #imagem = cv2.imread('./teste/file_example_TIFF_1MB.tiff')
-        #caracteristicas = [True,False,False,False]
-        #resp = self.Haralick(imagem,caracteristicas)
-        #print(resp)
 
 if __name__ == "__main__":
     app = App(); app.configure(bg='white',); app.mainloop()
