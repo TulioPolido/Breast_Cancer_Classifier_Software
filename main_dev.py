@@ -278,7 +278,8 @@ class App(Frame):
         Frame.__init__(self, master)
         self.master.title('Trabalho de Processamento de Imagens')
         #Atributo zoomed inicia janela em modo tela cheia
-        self.master.attributes('-zoomed', True)
+        #self.master.attributes('-zoomed', True)
+        self.master.attributes('-fullscreen', True)
         self.imagens = []
         self.temLabel = False
         self.temCanvas = False
@@ -320,4 +321,4 @@ class App(Frame):
         #print(resp)
 
 if __name__ == "__main__":
-    app = App(); app.configure(bg='white', ); app.mainloop()
+    app = App(); app.configure(bg='white',); app.mainloop()
