@@ -32,6 +32,12 @@ class App(Frame):
         return final
     ################### FIM reamostragemCinza ###################
 
+    def Hu(self):
+        resultado = []
+
+        return resultado
+    ################### FIM Hu ###################
+    
     def Haralick(self, image, caracteristicas):
         resultado = []
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
