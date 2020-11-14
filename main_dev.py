@@ -16,20 +16,10 @@ class App(Frame):
 
     def reamostragemCinza(self):
         #dividir todos pontos por 8 e transormar em escala de cinza
-        image = cv2.imread("./teste/file_example_TIFF_1MB.tiff")
-        print(image)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        print(gray)
-        gray = gray/8
-        print(gray)
-        '''
-        image = cv2.imread(self.imgCrop)
-        print(self.imgCrop)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-        print(image)
-        '''
-        return final
+        image = cv2.imread(".crop.png", 0) #Imagem em escala de cinza
+        #Reamostragem
+        gray = image/8
+        return gray
     ################### FIM reamostragemCinza ###################
 
     def Haralick(self, image, caracteristicas):
@@ -243,6 +233,9 @@ class App(Frame):
 
             self.imgCrop = aux_img.crop(border)
 
+            #Salvando imagem no disco
+            self.imgCrop.save(".crop.png")
+
             aux_crop = ImageTk.PhotoImage(self.imgCrop)
             self.la2.config(image=aux_crop, bg='#000000', width=aux_crop.width(), height=aux_crop.height())
             self.temCrop = True
@@ -278,6 +271,8 @@ class App(Frame):
         #variaveis globais
         Frame.__init__(self, master)
         self.master.title('Trabalho de Processamento de Imagens')
+        #Atributo zoomed inicia janela em modo tela cheia
+        self.master.attributes('-zoomed', True)
         self.imagens = []
         self.temLabel = False
         self.temCanvas = False
@@ -319,4 +314,4 @@ class App(Frame):
         #print(resp)
 
 if __name__ == "__main__":
-    app = App(); app.configure(bg='white'); app.mainloop()
+    app = App(); app.configure(bg='white', ); app.mainloop()
