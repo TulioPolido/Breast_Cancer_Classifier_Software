@@ -199,9 +199,21 @@ class App(Frame):
             val = self.Hu(imagem) + self.Haralick(imagem)
             train_feat.append(val)
 
+        #balanceando as imagens teste por classe
+        Tclas1,Tclas2,Tclas3,Tclas4 = np.array_split(train_feat,4)
+        Lclas1,Lclas2,Lclas3,Lclas4 = np.array_split(train_labels,4)
+
         #Dividir os dados em 75% treinamento e 25% testes
-        feat_train, feat_test, label_train, label_test = train_test_split(train_feat, train_labels,test_size=0.25, random_state=1)
-        
+        feat_train1, feat_test1, label_train1, label_test1 = train_test_split(Tclas1, Lclas1,test_size=0.25, random_state=1)
+        feat_train2, feat_test2, label_train2, label_test2 = train_test_split(Tclas2, Lclas2,test_size=0.25, random_state=1)
+        feat_train3, feat_test3, label_train3, label_test3 = train_test_split(Tclas3, Lclas3,test_size=0.25, random_state=1)
+        feat_train4, feat_test4, label_train4, label_test4 = train_test_split(Tclas4, Lclas4,test_size=0.25, random_state=1)
+
+        feat_train = np.concatenate((feat_train1,feat_train2,feat_train3,feat_train4))
+        feat_test = np.concatenate((feat_test1,feat_test2,feat_test3,feat_test4))
+        label_train = np.concatenate((label_train1,label_train2,label_train3,label_train4))
+        label_test = np.concatenate((label_test1,label_test2,label_test3,label_test4))
+
         #cria classificador
         self.clf_svm = LinearSVC(random_state=9)
         print('Classificador criado...')
