@@ -23,11 +23,11 @@ class App(Frame):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #converte para cinza
         final = gray/8 #rescalona os valores para o teto de 32
         final = final.astype(int) #converte para inteiros
-        _,gray = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY) #converte para binario
+        _,gray = cv2.threshold(gray, 16, 32, cv2.THRESH_BINARY) #converte para binario
 
         moments = cv2.moments(gray) #calcula os momentos da imagem
         huMoments = cv2.HuMoments(moments) #calcula os momentos de Hu
-
+        
         result = []
         
         #adiciona os valores de Hu para uma lista
@@ -38,7 +38,7 @@ class App(Frame):
         result.append(huMoments[4][0])
         result.append(huMoments[5][0])
         result.append(huMoments[6][0])
-
+        
         return result
     ################### FIM Hu ###################
     
@@ -56,7 +56,7 @@ class App(Frame):
 
             #Media da coluna para a caracteristica escolhida
             if(caracteristicas[0]):
-                ###somar homogeneidade
+                #somar homogeneidade
                 parcial = (features[0][4] + features[1][4] + features[2][4] + features[3][4])/4
                 resultado.append(parcial)
             elif(caracteristicas[1]):
