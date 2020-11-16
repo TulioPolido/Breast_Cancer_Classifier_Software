@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import tkinter.messagebox as msgbx
 import numpy as np
 from sklearn.svm import LinearSVC
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 class App(Frame):
     filename = ''
@@ -196,14 +198,22 @@ class App(Frame):
         for imagem in self.imagens:
             val = self.Hu(imagem) + self.Haralick(imagem)
             train_feat.append(val)
+
+        #Dividir os dados em 75% treinamento e 25% testes
+        feat_train, feat_test, label_train, label_test = train_test_split(train_feat, train_labels,test_size=0.25, random_state=1)
         
         #cria classificador
         self.clf_svm = LinearSVC(random_state=9)
         print('Classificador criado...')
 
-        #Prepara o modelo de acordo
-        self.clf_svm.fit(train_feat, train_labels)
+        #Prepara o modelo de acordo com os dados a serem usados para treinamento
+        self.clf_svm.fit(feat_train, label_train)
         print('Modelo criado...')
+
+        #Testes de acertos
+        resultados = self.clf_svm.predict(feat_test)
+        score = accuracy_score(label_test,resultados)
+        print(score)
 
     ################### FIM trein_clas ###################
 
