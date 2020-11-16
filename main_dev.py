@@ -243,7 +243,9 @@ class App(Frame):
 
             cropped = cv2.imread('.crop.png')
 
+            inicio = time.time()
             val = self.Hu(cropped) + self.Haralick(cropped)
+            tempo = time.time() - inicio
 
             val = np.array(val)
             prediction = self.clf_svm.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores

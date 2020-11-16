@@ -8,7 +8,7 @@ circulares C1, C2, C4, C8 e C16
 
 [ ] Reamostrar nº tons de cinza para <= 32  (parâmetro tem que ser reajustável pelo sistema)
 
-[ ] Valores calculados para a região selecionada deve ser exibidos em uma janela auxiliar
+[O] Valores calculados para a região selecionada deve ser exibidos em uma janela auxiliar
 
 [ ] O tempo de execução deve ser medido e exibido na interface
 
@@ -21,7 +21,7 @@ circulares C1, C2, C4, C8 e C16
 	
 [X] 75% das imagens devem ser escolhidas de forma aleatória, mas balanceadas entre as classes. 
 
-[X] O tempo de execução deve ser medido e exibido na interface.
+[O] O tempo de execução deve ser medido e exibido na interface.
 
 
 3) 
