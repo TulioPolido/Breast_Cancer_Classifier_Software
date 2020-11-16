@@ -13,6 +13,7 @@ import numpy as np
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+import time
 
 class App(Frame):
     filename = ''
@@ -189,6 +190,7 @@ class App(Frame):
     def trein_clas(self):
         train_feat = []
         train_labels = []
+        inicio = time.time()
 
         #seta o vetor de labels
         for i in range(0,400):
@@ -226,6 +228,10 @@ class App(Frame):
         resultados = self.clf_svm.predict(feat_test)
         score = accuracy_score(label_test,resultados)
         print(score)
+
+        self.tempo = time.time() - inicio
+
+        print(self.tempo)
 
     ################### FIM trein_clas ###################
 
@@ -354,6 +360,7 @@ class App(Frame):
         self.width = 0
         self.imgCrop = None
         self.img_atual = None
+        self.tempo = 0
 
 
         #Tela do software

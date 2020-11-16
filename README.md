@@ -21,7 +21,7 @@ circulares C1, C2, C4, C8 e C16
 	
 [X] 75% das imagens devem ser escolhidas de forma aleatória, mas balanceadas entre as classes. 
 
-[ ] O tempo de execução deve ser medido e exibido na interface.
+[X] O tempo de execução deve ser medido e exibido na interface.
 
 
 3) 
