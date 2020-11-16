@@ -10,6 +10,7 @@ import mahotas as mt
 import matplotlib.pyplot as plt
 import tkinter.messagebox as msgbx
 import numpy as np
+from sklearn.svm import LinearSVC
 
 class App(Frame):
     filename = ''
@@ -24,10 +25,21 @@ class App(Frame):
         moments = cv2.moments(gray) #calcula os momentos da imagem
         huMoments = cv2.HuMoments(moments) #calcula os momentos de Hu
 
-        return huMoments
+        result = []
+        
+        #adiciona os valores de Hu para uma lista
+        result.append(huMoments[0][0])
+        result.append(huMoments[1][0])
+        result.append(huMoments[2][0])
+        result.append(huMoments[3][0])
+        result.append(huMoments[4][0])
+        result.append(huMoments[5][0])
+        result.append(huMoments[6][0])
+
+        return result
     ################### FIM Hu ###################
     
-    def Haralick(self, image, caracteristicas):
+    def Haralick(self, image, caracteristicas=[True,True,True,True]):
         """Calcula as propriedades de Haralick da imagem e retorna um array com os resultados"""
         resultado = []
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #converte para cinza
@@ -152,7 +164,8 @@ class App(Frame):
     def ler_dir(self):
         """Le o diretório e 4 subdiretórios para carregar as imagens para a memória"""
         try:
-            folder = filedialog.askdirectory()
+            #folder = filedialog.askdirectory()
+            folder = './imagens'
 
             for i in range(1,5):
                 subFolder = folder + '/' + str(i)
@@ -172,7 +185,26 @@ class App(Frame):
     ################### FIM select_car ###################
 
     def trein_clas(self):
-        msgbx.showinfo(title="ATENÇÃO", message="Função não implementada!")
+        train_feat = []
+        train_labels = []
+
+        #seta o vetor de labels
+        for i in range(0,400):
+            train_labels.append(int(i/100) + 1)
+        
+        #Cria o vetor com os valores a serem analisados
+        for imagem in self.imagens:
+            val = self.Hu(imagem) + self.Haralick(imagem)
+            train_feat.append(val)
+        
+        #cria classificador
+        self.clf_svm = LinearSVC(random_state=9)
+        print('Classificador criado...')
+
+        #Prepara o modelo de acordo
+        self.clf_svm.fit(train_feat, train_labels)
+        print('Modelo criado...')
+
     ################### FIM trein_clas ###################
 
     def analisar_area(self):
@@ -181,14 +213,14 @@ class App(Frame):
             self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
             self.temCrop = False
 
-            image = cv2.imread(".crop.png")
-            
-            har = self.Haralick(image,caracteristicas=[True,False,False,False])
-            print(har)
+            cropped = cv2.imread('.crop.png')
 
-            hu = self.Hu(image)
-            print(hu)
+            val = self.Hu(cropped) + self.Haralick(cropped)
 
+            val = np.array(val)
+            prediction = self.clf_svm.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
+
+            print(prediction)
             #conferir se o classificador foi treinado e analisar a imagem
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")    
@@ -325,6 +357,10 @@ class App(Frame):
         self.la2.pack(side=BOTTOM)
 
         self.pack()
+
+        ###TESTES
+        self.ler_dir()
+        self.trein_clas()
 
 if __name__ == "__main__":
     app = App(); app.configure(bg='white',); app.mainloop()
