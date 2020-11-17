@@ -184,8 +184,93 @@ class App(Frame):
     ################### FIM ler_dir ###################
 
     def selec_car(self):
-        msgbx.showinfo(title="ATENÇÃO", message="Função não implementada!")
-    ################### FIM select_car ###################
+        
+        if(not self.Opened_Car_Menu):
+            
+            self.Opened_Car_Menu = True
+
+            Entropia = self.Entropia                #Recuperar valores globais
+            Energia = self.Energia                  #Recuperar valores globais
+            Homogeneidade = self.Homogeneidade      #Recuperar valores globais
+            Contraste = self.Contraste              #Recuperar valores globais
+
+            #Criação Interface
+            top = Toplevel()
+            top.title("Selecionar Características")
+            top.lift()      #Deixa a tela corrente no topo da pilha (gerenciador de janelas)
+
+            CheckEntropia = IntVar()
+            CheckEnergia = IntVar()
+            CheckHomogeneidade = IntVar()
+            CheckContraste = IntVar()
+
+            #Checkboxes do Menu
+            C1 = Checkbutton(top, text = "Entropia", variable = CheckEntropia, \
+                                onvalue=1, offvalue=0, \
+                                activebackground="green", height=2, \
+                                width = 20)
+            C2 = Checkbutton(top, text = "Energia", variable = CheckEnergia, \
+                                activebackground="green", height=2, \
+                                width = 20)
+            C3 = Checkbutton(top, text = "Homogeneidade", variable = CheckHomogeneidade, \
+                                activebackground="green", height=2, \
+                                width = 20)
+            C4 = Checkbutton(top, text = "Contraste", variable = CheckContraste, \
+                                activebackground="green", height=2, \
+                                width = 20)
+
+            #Verifica se as características já estavam selecionadas anteriormente
+            if(Entropia):
+                C1.select()
+
+            if(Energia):
+                C2.select()
+
+            if(Homogeneidade):
+                C3.select()
+
+            if(Contraste):
+                C4.select()
+
+            #Tela do Menu
+            C1.pack()
+            C2.pack()
+            C3.pack()
+            C4.pack()
+            
+            def on_closing():
+                top.quit()
+                top.destroy()
+
+            top.protocol("WM_DELETE_WINDOW", on_closing)
+            top.mainloop()
+
+            #Setando as características selecionadas
+            if(CheckEntropia.get() == 1):
+                self.Entropia = True
+            else:
+                self.Entropia = False
+
+            if(CheckEnergia.get() == 1):
+                self.Energia = True
+            else:
+                self.Energia = False
+
+            if(CheckHomogeneidade.get() == 1):
+                self.Homogeneidade = True
+            else:
+                self.Homogeneidade = False
+
+            if(CheckContraste.get() == 1):
+                self.Contraste = True
+            else:
+                self.Contraste = False
+
+            self.Opened_Car_Menu = False
+            msgbx.showinfo(title="Selecionar Características", message="As características marcadas foram selecionadas.")
+        else:
+            msgbx.showinfo(title="ATENÇÃO!", message="O Menu de características já está aberto.")
+    ################### FIM selec_car ###################
 
     def trein_clas(self):
         train_feat = []
@@ -364,6 +449,13 @@ class App(Frame):
         self.img_atual = None
         self.tempo = 0
 
+        self.Opened_Car_Menu = False
+        self.Entropia = True
+        self.Energia = True
+        self.Homogeneidade = True
+        self.Contraste = True
+        self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
+
 
         #Tela do software
         fram = Frame(self)
@@ -373,7 +465,7 @@ class App(Frame):
         Button(fram, text="Selecionar Região",  command=self.select_area).pack(side=LEFT)
         Button(fram, text="Finalizar seleção",  command=self.deleta_canvas).pack(side=LEFT)
         Button(fram, text="Analisar área selecionada", command=self.analisar_area,bg='gray').pack(side=LEFT)
-        Button(fram, text="Selecionar Características", command=self.selec_car,bg='gray').pack(side=LEFT)
+        Button(fram, text="Selecionar Características", command=self.selec_car).pack(side=LEFT)
         Button(fram, text="Ler diretório", command=self.ler_dir).pack(side=LEFT)
         Button(fram, text="Treinar classificador", command=self.trein_clas,bg='gray').pack(side=LEFT)
         
@@ -390,8 +482,8 @@ class App(Frame):
         self.pack()
 
         ###TESTES
-        self.ler_dir()
-        self.trein_clas()
+        #self.ler_dir()
+        #self.trein_clas()
 
 if __name__ == "__main__":
     app = App(); app.configure(bg='white',); app.mainloop()
