@@ -130,8 +130,6 @@ class App(Frame):
 
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Finalize a seleção de região antes de abrir outra imagem!")
-            
-        #self.chg_image()
     ################### FIM open ###################
 
     def zoom_in(self):
@@ -174,7 +172,6 @@ class App(Frame):
         """Le o diretório e 4 subdiretórios para carregar as imagens para a memória"""
         try:
             folder = filedialog.askdirectory()
-            #folder = './imagens' #Para testes automatizados
 
             for i in range(1,5):
                 subFolder = folder + '/' + str(i)
@@ -190,7 +187,7 @@ class App(Frame):
     ################### FIM ler_dir ###################
 
     def selec_car(self):
-        
+        """Cria um popup que permite a seleção das caracteristicas de Haralick desejadas"""
         if(not self.Opened_Car_Menu):
             
             self.Opened_Car_Menu = True
@@ -282,6 +279,7 @@ class App(Frame):
     ################### FIM selec_car ###################
 
     def trein_clas(self):
+        """Treina uma rede neural"""
         if len(self.imagens) == 400:
             inicio = time.time()
             train_feat = []
@@ -318,15 +316,12 @@ class App(Frame):
             print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(X_train, y_train)))
             print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(X_test, y_test)))
 
-            #print(classification_report(y_test, y_pred, target_names=class_names))
-
             # Calcula a matriz de confusão
             cnf_matrix = confusion_matrix(y_test, y_pred)
             print(cnf_matrix)
             print(self.acuracia(cnf_matrix))
             print(self.especificidade(cnf_matrix))
             
-
             # Calcula tempo de execução
             self.tempo = time.time() - inicio
 
@@ -360,6 +355,7 @@ class App(Frame):
     ################### FIM analisar_area ###################
 
     def acuracia(self,matriz):
+        """Calcula a acuracia da rede baseado na matriz de confusao"""
         resp = 0
 
         for i in range(0,4):
@@ -369,6 +365,7 @@ class App(Frame):
     ################### FIM acuracia ###################
 
     def especificidade(self,matriz):
+        """Calcula a especificidade da rede baseado na matriz de confusão"""
         resp = 0
 
         for i in range(0,4):
@@ -390,7 +387,6 @@ class App(Frame):
 
     def popupmsg(self, title, msg, geometry):
         """Posta uma imagem em popup para o usuário""" 
-        #msgbx.showinfo(title=title, message=msg)
         popup = tk.Toplevel()
         popup.wm_title(title)
         popup.geometry(geometry)
