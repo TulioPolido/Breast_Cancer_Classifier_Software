@@ -463,6 +463,12 @@ class App(Frame):
         self.canvas.bind('<Button-1>', get_mouse_posn)
         self.canvas.bind('<Double-Button-1>', confirm_cut) # O usuario deve dar clique duplo para confirmar corte   
     ################### FIM select_area ###################
+
+    def printaValores(self,tempo=None,espec=None,acc=None,matriz=None,carac=None):
+        #Criação Interface
+        top = Toplevel()
+        top.title("Informações")
+        top.lift()      #Deixa a tela corrente no topo da pilha (gerenciador de janelas)
                
     def __init__(self, master=None):
         Frame.__init__(self, master)
