@@ -300,19 +300,19 @@ class App(Frame):
         X_train, X_test, y_train, y_test = train_test_split(X, y, 
                                 test_size=0.25, random_state=0)
         
-        mlp = MLPClassifier(solver='lbfgs', random_state=0)
-        mlp.fit(X_train, y_train)
-        y_pred = mlp.predict(X_test)
+        self.mlp = MLPClassifier(solver='lbfgs', random_state=0)
+        self.mlp.fit(X_train, y_train)
+        y_pred = self.mlp.predict(X_test)
 
 
-        print("Camadas da rede: {}".format(mlp.n_layers_))
-        print("Neurônios na camada oculta: {}".format(mlp.hidden_layer_sizes))
-        print("Neurônios na camada de saída: {}".format(mlp.n_outputs_))
-        print("Pesos na camada de entrada: {}".format(mlp.coefs_[0].shape))
-        print("Pesos na camada oculta: {}".format(mlp.coefs_[1].shape))
+        print("Camadas da rede: {}".format(self.mlp.n_layers_))
+        print("Neurônios na camada oculta: {}".format(self.mlp.hidden_layer_sizes))
+        print("Neurônios na camada de saída: {}".format(self.mlp.n_outputs_))
+        print("Pesos na camada de entrada: {}".format(self.mlp.coefs_[0].shape))
+        print("Pesos na camada oculta: {}".format(self.mlp.coefs_[1].shape))
 
-        print("Acurácia da base de treinamento: {:.2f}".format(mlp.score(X_train, y_train)))
-        print("Acurácia da base de teste: {:.2f}".format(mlp.score(X_test, y_test)))
+        print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(X_train, y_train)))
+        print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(X_test, y_test)))
 
         #print(classification_report(y_test, y_pred, target_names=class_names))
 
@@ -341,7 +341,7 @@ class App(Frame):
             tempo = time.time() - inicio
 
             val = np.array(val)
-            prediction = self.clf_svm.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
+            prediction = self.mlp.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
 
             print(prediction)
             #conferir se o classificador foi treinado e analisar a imagem
@@ -457,7 +457,6 @@ class App(Frame):
         self.imgCrop = None
         self.img_atual = None
         self.tempo = 0
-
         self.Opened_Car_Menu = False
         self.Entropia = True
         self.Energia = True
