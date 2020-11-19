@@ -173,8 +173,8 @@ class App(Frame):
     def ler_dir(self):
         """Le o diretório e 4 subdiretórios para carregar as imagens para a memória"""
         try:
-            #folder = filedialog.askdirectory()
-            folder = './imagens'
+            folder = filedialog.askdirectory()
+            #folder = './imagens' #Para testes automatizados
 
             for i in range(1,5):
                 subFolder = folder + '/' + str(i)
@@ -333,11 +333,11 @@ class App(Frame):
             print('Tempo de execução: {0}'.format(self.tempo))
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Primeiro leia o diretório com as imagens de teste!")
-
     ################### FIM trein_clas ###################
 
     def analisar_area(self):
         """Analisa a area recortada pelo usuario"""
+
         if 'mlp' in globals():
             if self.temCrop:
                 self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
@@ -356,7 +356,7 @@ class App(Frame):
             else:
                 msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!") 
         else:
-            msgbx.showinfo(title="ATENÇÃO", message="O classificador não foi treinado!")   
+            msgbx.showinfo(title="ATENÇÃO", message="O classificador não foi treinado!") 
     ################### FIM analisar_area ###################
 
     def acuracia(self,matriz):
@@ -517,10 +517,6 @@ class App(Frame):
         self.la2.pack(side=BOTTOM)
 
         self.pack()
-
-        ###TESTES
-        #self.ler_dir()
-        #self.trein_clas()
-
+        
 if __name__ == "__main__":
     app = App(); app.configure(bg='white',); app.mainloop()
