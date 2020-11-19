@@ -304,7 +304,7 @@ class App(Frame):
             X_train, X_test, y_train, y_test = train_test_split(X, y, 
                                     test_size=0.25, random_state=0)
             
-            self.mlp = MLPClassifier(solver='lbfgs', random_state=0)
+            self.mlp = MLPClassifier(solver='lbfgs', random_state=5, max_iter=400, hidden_layer_sizes=[200,300])
             self.mlp.fit(X_train, y_train)
             y_pred = self.mlp.predict(X_test)
 
