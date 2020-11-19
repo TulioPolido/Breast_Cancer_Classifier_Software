@@ -273,7 +273,7 @@ class App(Frame):
                 self.Contraste = False
 
             self.Opened_Car_Menu = False
-            
+
             self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
             print(self.caracteristicas)
             msgbx.showinfo(title="Selecionar Características", message="As características marcadas foram selecionadas.")
@@ -323,6 +323,8 @@ class App(Frame):
             # Calcula a matriz de confusão
             cnf_matrix = confusion_matrix(y_test, y_pred)
             print(cnf_matrix)
+            print(self.acuracia(cnf_matrix))
+            print(self.especificidade(cnf_matrix))
             
 
             # Calcula tempo de execução
@@ -356,6 +358,25 @@ class App(Frame):
         else:
             msgbx.showinfo(title="ATENÇÃO", message="O classificador não foi treinado!")   
     ################### FIM analisar_area ###################
+
+    def acuracia(self,matriz):
+        resp = 0
+
+        for i in range(0,4):
+            resp += matriz[i][i]
+
+        return resp/100
+    ################### FIM acuracia ###################
+
+    def especificidade(self,matriz):
+        resp = 0
+
+        for i in range(0,4):
+            for j in range(0,4):
+                if i != j:
+                    resp+= matriz[i][j]
+
+        return resp/300
 
     def deleta_canvas(self):
         """Deleta o canvas existente"""
