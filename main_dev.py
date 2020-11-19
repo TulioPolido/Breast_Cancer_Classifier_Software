@@ -14,6 +14,12 @@ from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import time
+from platform import system
+import pandas as pd
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import LabelEncoder
+np.set_printoptions(precision=2)
 
 class App(Frame):
     filename = ''
@@ -38,7 +44,7 @@ class App(Frame):
         result.append(huMoments[4][0])
         result.append(huMoments[5][0])
         result.append(huMoments[6][0])
-        
+
         return result
     ################### FIM Hu ###################
     
@@ -73,7 +79,7 @@ class App(Frame):
                 resultado.append(parcial)
             
             dist*=2
-            
+
         return resultado
     ################### FIM Haralick ###################
 
@@ -277,55 +283,62 @@ class App(Frame):
 
     def trein_clas(self):
         if len(self.imagens) == 400:
+            inicio = time.time()
             train_feat = []
             train_labels = []
-            inicio = time.time()
 
             #seta o vetor de labels
             for i in range(0,400):
                 train_labels.append(int(i/100) + 1)
-            
+        
             #Cria o vetor com os valores a serem analisados
             for imagem in self.imagens:
                 val = self.Hu(imagem) + self.Haralick(imagem)
                 train_feat.append(val)
 
-            #balanceando as imagens teste por classe
-            Tclas1,Tclas2,Tclas3,Tclas4 = np.array_split(train_feat,4)
-            Lclas1,Lclas2,Lclas3,Lclas4 = np.array_split(train_labels,4)
+            ######## Inicio rede neural #######
+            # Particionamento da base
+            X = train_feat
+            y = train_labels
+            
+            X_train, X_test, y_train, y_test = train_test_split(X, y, 
+                                    test_size=0.25, random_state=0)
+            
+            self.mlp = MLPClassifier(solver='lbfgs', random_state=0)
+            self.mlp.fit(X_train, y_train)
+            y_pred = self.mlp.predict(X_test)
 
-            #Dividir os dados em 75% treinamento e 25% testes
-            feat_train1, feat_test1, label_train1, label_test1 = train_test_split(Tclas1, Lclas1,test_size=0.25, random_state=1)
-            feat_train2, feat_test2, label_train2, label_test2 = train_test_split(Tclas2, Lclas2,test_size=0.25, random_state=1)
-            feat_train3, feat_test3, label_train3, label_test3 = train_test_split(Tclas3, Lclas3,test_size=0.25, random_state=1)
-            feat_train4, feat_test4, label_train4, label_test4 = train_test_split(Tclas4, Lclas4,test_size=0.25, random_state=1)
 
-            feat_train = np.concatenate((feat_train1,feat_train2,feat_train3,feat_train4))
-            feat_test = np.concatenate((feat_test1,feat_test2,feat_test3,feat_test4))
-            label_train = np.concatenate((label_train1,label_train2,label_train3,label_train4))
-            label_test = np.concatenate((label_test1,label_test2,label_test3,label_test4))
+            print("Camadas da rede: {}".format(self.mlp.n_layers_))
+            print("Neurônios na camada oculta: {}".format(self.mlp.hidden_layer_sizes))
+            print("Neurônios na camada de saída: {}".format(self.mlp.n_outputs_))
+            print("Pesos na camada de entrada: {}".format(self.mlp.coefs_[0].shape))
+            print("Pesos na camada oculta: {}".format(self.mlp.coefs_[1].shape))
 
-            #cria classificador
-            self.clf_svm = LinearSVC(random_state=9)
-            print('Classificardor criado...')
+            print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(X_train, y_train)))
+            print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(X_test, y_test)))
 
-            #Prepara o modelo de acordo com os dados a serem usados para treinamento
-            self.clf_svm.fit(feat_train, label_train)
-            print('Modelo treinado...')
+            #print(classification_report(y_test, y_pred, target_names=class_names))
 
-            #Testes de acertos
-            resultados = self.clf_svm.predict(feat_test)
-            score = accuracy_score(label_test,resultados)
-            print('Taxa de acertos: ' + str(score*100) + '%')
+            # Calcula a matriz de confusão
+            cnf_matrix = confusion_matrix(y_test, y_pred)
+            print(cnf_matrix)
+            print(self.acuracia(cnf_matrix))
+            print(self.especificidade(cnf_matrix))
+            
+
+            # Calcula tempo de execução
             self.tempo = time.time() - inicio
-            print('Tempo total: ' + str(self.tempo) + ' segundos')
+
+            print('Tempo de execução: {0}'.format(self.tempo))
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Primeiro leia o diretório com as imagens de teste!")
     ################### FIM trein_clas ###################
 
     def analisar_area(self):
         """Analisa a area recortada pelo usuario"""
-        if 'clf_svm' in globals():
+
+        if 'mlp' in globals():
             if self.temCrop:
                 self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
                 self.temCrop = False
@@ -337,14 +350,33 @@ class App(Frame):
                 tempo = time.time() - inicio
 
                 val = np.array(val)
-                prediction = self.clf_svm.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
+                prediction = self.mlp.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
 
-                #conferir se o classificador foi treinado e analisar a imagem
+                print(prediction)
             else:
                 msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!") 
         else:
-            msgbx.showinfo(title="ATENÇÃO", message="O classificador não foi treinado!")
+            msgbx.showinfo(title="ATENÇÃO", message="O classificador não foi treinado!") 
     ################### FIM analisar_area ###################
+
+    def acuracia(self,matriz):
+        resp = 0
+
+        for i in range(0,4):
+            resp += matriz[i][i]
+
+        return resp/100
+    ################### FIM acuracia ###################
+
+    def especificidade(self,matriz):
+        resp = 0
+
+        for i in range(0,4):
+            for j in range(0,4):
+                if i != j:
+                    resp+= matriz[i][j]
+
+        return resp/300
 
     def deleta_canvas(self):
         """Deleta o canvas existente"""
@@ -440,9 +472,10 @@ class App(Frame):
         Frame.__init__(self, master)
         self.master.title('Trabalho de Processamento de Imagens')
         #Atributo zoomed inicia janela em modo tela cheia
-        #self.master.attributes('-zoomed', True)
-        #self.master.attributes('-fullscreen', True)
-
+        if system() == 'Linux':
+            self.master.attributes('-zoomed', True)
+        elif system() == 'Windows':
+            self.master.attributes('-fullscreen', True)
         #Variaveis da classe
         self.imagens = []
         self.temLabel = False
@@ -453,7 +486,6 @@ class App(Frame):
         self.imgCrop = None
         self.img_atual = None
         self.tempo = 0
-
         self.Opened_Car_Menu = False
         self.Entropia = True
         self.Energia = True
