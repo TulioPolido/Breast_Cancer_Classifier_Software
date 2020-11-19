@@ -273,80 +273,88 @@ class App(Frame):
                 self.Contraste = False
 
             self.Opened_Car_Menu = False
+            
+            self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
+            print(self.caracteristicas)
             msgbx.showinfo(title="Selecionar Características", message="As características marcadas foram selecionadas.")
         else:
             msgbx.showinfo(title="ATENÇÃO!", message="O Menu de características já está aberto.")
     ################### FIM selec_car ###################
 
     def trein_clas(self):
-        inicio = time.time()
-        train_feat = []
-        train_labels = []
+        if len(self.imagens) == 400:
+            inicio = time.time()
+            train_feat = []
+            train_labels = []
 
-        #seta o vetor de labels
-        for i in range(0,400):
-            train_labels.append(int(i/100) + 1)
-       
-        #Cria o vetor com os valores a serem analisados
-        for imagem in self.imagens:
-            val = self.Hu(imagem) + self.Haralick(imagem)
-            train_feat.append(val)
-
-        ######## Inicio rede neural #######
-        # Particionamento da base
-        X = train_feat
-        y = train_labels
+            #seta o vetor de labels
+            for i in range(0,400):
+                train_labels.append(int(i/100) + 1)
         
-        X_train, X_test, y_train, y_test = train_test_split(X, y, 
-                                test_size=0.25, random_state=0)
-        
-        self.mlp = MLPClassifier(solver='lbfgs', random_state=0)
-        self.mlp.fit(X_train, y_train)
-        y_pred = self.mlp.predict(X_test)
+            #Cria o vetor com os valores a serem analisados
+            for imagem in self.imagens:
+                val = self.Hu(imagem) + self.Haralick(imagem)
+                train_feat.append(val)
+
+            ######## Inicio rede neural #######
+            # Particionamento da base
+            X = train_feat
+            y = train_labels
+            
+            X_train, X_test, y_train, y_test = train_test_split(X, y, 
+                                    test_size=0.25, random_state=0)
+            
+            self.mlp = MLPClassifier(solver='lbfgs', random_state=0)
+            self.mlp.fit(X_train, y_train)
+            y_pred = self.mlp.predict(X_test)
 
 
-        print("Camadas da rede: {}".format(self.mlp.n_layers_))
-        print("Neurônios na camada oculta: {}".format(self.mlp.hidden_layer_sizes))
-        print("Neurônios na camada de saída: {}".format(self.mlp.n_outputs_))
-        print("Pesos na camada de entrada: {}".format(self.mlp.coefs_[0].shape))
-        print("Pesos na camada oculta: {}".format(self.mlp.coefs_[1].shape))
+            print("Camadas da rede: {}".format(self.mlp.n_layers_))
+            print("Neurônios na camada oculta: {}".format(self.mlp.hidden_layer_sizes))
+            print("Neurônios na camada de saída: {}".format(self.mlp.n_outputs_))
+            print("Pesos na camada de entrada: {}".format(self.mlp.coefs_[0].shape))
+            print("Pesos na camada oculta: {}".format(self.mlp.coefs_[1].shape))
 
-        print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(X_train, y_train)))
-        print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(X_test, y_test)))
+            print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(X_train, y_train)))
+            print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(X_test, y_test)))
 
-        #print(classification_report(y_test, y_pred, target_names=class_names))
+            #print(classification_report(y_test, y_pred, target_names=class_names))
 
-        # Calcula a matriz de confusão
-        cnf_matrix = confusion_matrix(y_test, y_pred)
-        print(cnf_matrix)
-        
+            # Calcula a matriz de confusão
+            cnf_matrix = confusion_matrix(y_test, y_pred)
+            print(cnf_matrix)
+            
 
-        # Calcula tempo de execução
-        self.tempo = time.time() - inicio
+            # Calcula tempo de execução
+            self.tempo = time.time() - inicio
 
-        print('Tempo de execução: {0}'.format(self.tempo))
+            print('Tempo de execução: {0}'.format(self.tempo))
+        else:
+            msgbx.showinfo(title="ATENÇÃO", message="Primeiro leia o diretório com as imagens de teste!")
 
     ################### FIM trein_clas ###################
 
     def analisar_area(self):
         """Analisa a area recortada pelo usuario"""
-        if self.temCrop:
-            self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
-            self.temCrop = False
+        if 'mlp' in globals():
+            if self.temCrop:
+                self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
+                self.temCrop = False
 
-            cropped = cv2.imread('.crop.png')
+                cropped = cv2.imread('.crop.png')
 
-            inicio = time.time()
-            val = self.Hu(cropped) + self.Haralick(cropped)
-            tempo = time.time() - inicio
+                inicio = time.time()
+                val = self.Hu(cropped) + self.Haralick(cropped)
+                tempo = time.time() - inicio
 
-            val = np.array(val)
-            prediction = self.mlp.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
+                val = np.array(val)
+                prediction = self.mlp.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
 
-            print(prediction)
-            #conferir se o classificador foi treinado e analisar a imagem
+                print(prediction)
+            else:
+                msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!") 
         else:
-            msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")    
+            msgbx.showinfo(title="ATENÇÃO", message="O classificador não foi treinado!")   
     ################### FIM analisar_area ###################
 
     def deleta_canvas(self):
@@ -447,7 +455,7 @@ class App(Frame):
             self.master.attributes('-zoomed', True)
         elif system() == 'Windows':
             self.master.attributes('-fullscreen', True)
-         #Variaveis da classe
+        #Variaveis da classe
         self.imagens = []
         self.temLabel = False
         self.temCanvas = False
