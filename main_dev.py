@@ -167,8 +167,8 @@ class App(Frame):
     def ler_dir(self):
         """Le o diretório e 4 subdiretórios para carregar as imagens para a memória"""
         try:
-            #folder = filedialog.askdirectory()
-            folder = './imagens'
+            folder = filedialog.askdirectory()
+            #folder = './imagens' #Para testes automatizados
 
             for i in range(1,5):
                 subFolder = folder + '/' + str(i)
@@ -267,78 +267,83 @@ class App(Frame):
                 self.Contraste = False
 
             self.Opened_Car_Menu = False
+
+            self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
+            print(self.caracteristicas)
             msgbx.showinfo(title="Selecionar Características", message="As características marcadas foram selecionadas.")
         else:
             msgbx.showinfo(title="ATENÇÃO!", message="O Menu de características já está aberto.")
     ################### FIM selec_car ###################
 
     def trein_clas(self):
-        train_feat = []
-        train_labels = []
-        inicio = time.time()
+        if len(self.imagens) == 400:
+            train_feat = []
+            train_labels = []
+            inicio = time.time()
 
-        #seta o vetor de labels
-        for i in range(0,400):
-            train_labels.append(int(i/100) + 1)
-        
-        #Cria o vetor com os valores a serem analisados
-        for imagem in self.imagens:
-            val = self.Hu(imagem) + self.Haralick(imagem)
-            train_feat.append(val)
+            #seta o vetor de labels
+            for i in range(0,400):
+                train_labels.append(int(i/100) + 1)
+            
+            #Cria o vetor com os valores a serem analisados
+            for imagem in self.imagens:
+                val = self.Hu(imagem) + self.Haralick(imagem)
+                train_feat.append(val)
 
-        #balanceando as imagens teste por classe
-        Tclas1,Tclas2,Tclas3,Tclas4 = np.array_split(train_feat,4)
-        Lclas1,Lclas2,Lclas3,Lclas4 = np.array_split(train_labels,4)
+            #balanceando as imagens teste por classe
+            Tclas1,Tclas2,Tclas3,Tclas4 = np.array_split(train_feat,4)
+            Lclas1,Lclas2,Lclas3,Lclas4 = np.array_split(train_labels,4)
 
-        #Dividir os dados em 75% treinamento e 25% testes
-        feat_train1, feat_test1, label_train1, label_test1 = train_test_split(Tclas1, Lclas1,test_size=0.25, random_state=1)
-        feat_train2, feat_test2, label_train2, label_test2 = train_test_split(Tclas2, Lclas2,test_size=0.25, random_state=1)
-        feat_train3, feat_test3, label_train3, label_test3 = train_test_split(Tclas3, Lclas3,test_size=0.25, random_state=1)
-        feat_train4, feat_test4, label_train4, label_test4 = train_test_split(Tclas4, Lclas4,test_size=0.25, random_state=1)
+            #Dividir os dados em 75% treinamento e 25% testes
+            feat_train1, feat_test1, label_train1, label_test1 = train_test_split(Tclas1, Lclas1,test_size=0.25, random_state=1)
+            feat_train2, feat_test2, label_train2, label_test2 = train_test_split(Tclas2, Lclas2,test_size=0.25, random_state=1)
+            feat_train3, feat_test3, label_train3, label_test3 = train_test_split(Tclas3, Lclas3,test_size=0.25, random_state=1)
+            feat_train4, feat_test4, label_train4, label_test4 = train_test_split(Tclas4, Lclas4,test_size=0.25, random_state=1)
 
-        feat_train = np.concatenate((feat_train1,feat_train2,feat_train3,feat_train4))
-        feat_test = np.concatenate((feat_test1,feat_test2,feat_test3,feat_test4))
-        label_train = np.concatenate((label_train1,label_train2,label_train3,label_train4))
-        label_test = np.concatenate((label_test1,label_test2,label_test3,label_test4))
+            feat_train = np.concatenate((feat_train1,feat_train2,feat_train3,feat_train4))
+            feat_test = np.concatenate((feat_test1,feat_test2,feat_test3,feat_test4))
+            label_train = np.concatenate((label_train1,label_train2,label_train3,label_train4))
+            label_test = np.concatenate((label_test1,label_test2,label_test3,label_test4))
 
-        #cria classificador
-        self.clf_svm = LinearSVC(random_state=9)
-        print('Classificador criado...')
+            #cria classificador
+            self.clf_svm = LinearSVC(random_state=9)
+            print('Classificardor criado...')
 
-        #Prepara o modelo de acordo com os dados a serem usados para treinamento
-        self.clf_svm.fit(feat_train, label_train)
-        print('Modelo criado...')
+            #Prepara o modelo de acordo com os dados a serem usados para treinamento
+            self.clf_svm.fit(feat_train, label_train)
+            print('Modelo treinado...')
 
-        #Testes de acertos
-        resultados = self.clf_svm.predict(feat_test)
-        score = accuracy_score(label_test,resultados)
-        print(score)
-
-        self.tempo = time.time() - inicio
-
-        print(self.tempo)
-
+            #Testes de acertos
+            resultados = self.clf_svm.predict(feat_test)
+            score = accuracy_score(label_test,resultados)
+            print('Taxa de acertos: ' + str(score*100) + '%')
+            self.tempo = time.time() - inicio
+            print('Tempo total: ' + str(self.tempo) + ' segundos')
+        else:
+            msgbx.showinfo(title="ATENÇÃO", message="Primeiro leia o diretório com as imagens de teste!")
     ################### FIM trein_clas ###################
 
     def analisar_area(self):
         """Analisa a area recortada pelo usuario"""
-        if self.temCrop:
-            self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
-            self.temCrop = False
+        if 'clf_svm' in globals():
+            if self.temCrop:
+                self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
+                self.temCrop = False
 
-            cropped = cv2.imread('.crop.png')
+                cropped = cv2.imread('.crop.png')
 
-            inicio = time.time()
-            val = self.Hu(cropped) + self.Haralick(cropped)
-            tempo = time.time() - inicio
+                inicio = time.time()
+                val = self.Hu(cropped) + self.Haralick(cropped)
+                tempo = time.time() - inicio
 
-            val = np.array(val)
-            prediction = self.clf_svm.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
+                val = np.array(val)
+                prediction = self.clf_svm.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
 
-            print(prediction)
-            #conferir se o classificador foi treinado e analisar a imagem
+                #conferir se o classificador foi treinado e analisar a imagem
+            else:
+                msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!") 
         else:
-            msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")    
+            msgbx.showinfo(title="ATENÇÃO", message="O classificador não foi treinado!")
     ################### FIM analisar_area ###################
 
     def deleta_canvas(self):
@@ -480,10 +485,6 @@ class App(Frame):
         self.la2.pack(side=BOTTOM)
 
         self.pack()
-
-        ###TESTES
-        #self.ler_dir()
-        #self.trein_clas()
-
+        
 if __name__ == "__main__":
     app = App(); app.configure(bg='white',); app.mainloop()
