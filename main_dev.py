@@ -14,6 +14,12 @@ from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import time
+from platform import system
+import pandas as pd
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import LabelEncoder
+np.set_printoptions(precision=2)
 
 class App(Frame):
     filename = ''
@@ -38,7 +44,7 @@ class App(Frame):
         result.append(huMoments[4][0])
         result.append(huMoments[5][0])
         result.append(huMoments[6][0])
-        
+
         return result
     ################### FIM Hu ###################
     
@@ -73,7 +79,7 @@ class App(Frame):
                 resultado.append(parcial)
             
             dist*=2
-            
+
         return resultado
     ################### FIM Haralick ###################
 
@@ -273,50 +279,52 @@ class App(Frame):
     ################### FIM selec_car ###################
 
     def trein_clas(self):
+        inicio = time.time()
         train_feat = []
         train_labels = []
-        inicio = time.time()
 
         #seta o vetor de labels
         for i in range(0,400):
             train_labels.append(int(i/100) + 1)
-        
+       
         #Cria o vetor com os valores a serem analisados
         for imagem in self.imagens:
             val = self.Hu(imagem) + self.Haralick(imagem)
             train_feat.append(val)
 
-        #balanceando as imagens teste por classe
-        Tclas1,Tclas2,Tclas3,Tclas4 = np.array_split(train_feat,4)
-        Lclas1,Lclas2,Lclas3,Lclas4 = np.array_split(train_labels,4)
+        ######## Inicio rede neural #######
+        # Particionamento da base
+        X = train_feat
+        y = train_labels
+        
+        X_train, X_test, y_train, y_test = train_test_split(X, y, 
+                                test_size=0.25, random_state=0)
+        
+        mlp = MLPClassifier(solver='lbfgs', random_state=0)
+        mlp.fit(X_train, y_train)
+        y_pred = mlp.predict(X_test)
 
-        #Dividir os dados em 75% treinamento e 25% testes
-        feat_train1, feat_test1, label_train1, label_test1 = train_test_split(Tclas1, Lclas1,test_size=0.25, random_state=1)
-        feat_train2, feat_test2, label_train2, label_test2 = train_test_split(Tclas2, Lclas2,test_size=0.25, random_state=1)
-        feat_train3, feat_test3, label_train3, label_test3 = train_test_split(Tclas3, Lclas3,test_size=0.25, random_state=1)
-        feat_train4, feat_test4, label_train4, label_test4 = train_test_split(Tclas4, Lclas4,test_size=0.25, random_state=1)
 
-        feat_train = np.concatenate((feat_train1,feat_train2,feat_train3,feat_train4))
-        feat_test = np.concatenate((feat_test1,feat_test2,feat_test3,feat_test4))
-        label_train = np.concatenate((label_train1,label_train2,label_train3,label_train4))
-        label_test = np.concatenate((label_test1,label_test2,label_test3,label_test4))
+        print("Camadas da rede: {}".format(mlp.n_layers_))
+        print("Neurônios na camada oculta: {}".format(mlp.hidden_layer_sizes))
+        print("Neurônios na camada de saída: {}".format(mlp.n_outputs_))
+        print("Pesos na camada de entrada: {}".format(mlp.coefs_[0].shape))
+        print("Pesos na camada oculta: {}".format(mlp.coefs_[1].shape))
 
-        #cria classificador
-        self.clf_svm = LinearSVC(random_state=9)
-        print('Classificador criado...')
+        print("Acurácia da base de treinamento: {:.2f}".format(mlp.score(X_train, y_train)))
+        print("Acurácia da base de teste: {:.2f}".format(mlp.score(X_test, y_test)))
 
-        #Prepara o modelo de acordo com os dados a serem usados para treinamento
-        self.clf_svm.fit(feat_train, label_train)
-        print('Modelo criado...')
+        #print(classification_report(y_test, y_pred, target_names=class_names))
 
-        #Testes de acertos
-        resultados = self.clf_svm.predict(feat_test)
-        score = accuracy_score(label_test,resultados)
-        print(score)
+        # Calcula a matriz de confusão
+        cnf_matrix = confusion_matrix(y_test, y_pred)
+        print(cnf_matrix)
+        
 
+        # Calcula tempo de execução
         self.tempo = time.time() - inicio
 
-        print(self.tempo)
+        print('Tempo de execução: {0}'.format(self.tempo))
 
     ################### FIM trein_clas ###################
 
@@ -435,10 +443,11 @@ class App(Frame):
         Frame.__init__(self, master)
         self.master.title('Trabalho de Processamento de Imagens')
         #Atributo zoomed inicia janela em modo tela cheia
-        #self.master.attributes('-zoomed', True)
-        #self.master.attributes('-fullscreen', True)
-
-        #Variaveis da classe
+        if system() == 'Linux':
+            self.master.attributes('-zoomed', True)
+        elif system() == 'Windows':
+            self.master.attributes('-fullscreen', True)
+         #Variaveis da classe
         self.imagens = []
         self.temLabel = False
         self.temCanvas = False
