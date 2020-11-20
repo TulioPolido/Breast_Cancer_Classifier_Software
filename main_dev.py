@@ -2,23 +2,20 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import * 
 from PIL import Image, ImageTk
+from platform import system
+import time
 import os
 import pydicom
-import math
 import cv2
 import mahotas as mt
 import matplotlib.pyplot as plt
 import tkinter.messagebox as msgbx
 import numpy as np
-from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-import time
-from platform import system
-import pandas as pd
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import MinMaxScaler
+
 np.set_printoptions(precision=2)
 
 class App(Frame):
@@ -127,11 +124,8 @@ class App(Frame):
                     self.width = self.im.width
                     self.height = self.im.height
                     self.chg_image()
-
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Finalize a seleção de região antes de abrir outra imagem!")
-            
-        #self.chg_image()
     ################### FIM open ###################
 
     def zoom_in(self):
@@ -173,8 +167,8 @@ class App(Frame):
     def ler_dir(self):
         """Le o diretório e 4 subdiretórios para carregar as imagens para a memória"""
         try:
-            folder = filedialog.askdirectory()
-            #folder = './imagens' #Para testes automatizados
+            #folder = filedialog.askdirectory()
+            folder = './imagens'
 
             for i in range(1,5):
                 subFolder = folder + '/' + str(i)
@@ -190,7 +184,7 @@ class App(Frame):
     ################### FIM ler_dir ###################
 
     def selec_car(self):
-        
+        """Cria um popup que permite a seleção das caracteristicas de Haralick desejadas"""
         if(not self.Opened_Car_Menu):
             
             self.Opened_Car_Menu = True
@@ -275,13 +269,13 @@ class App(Frame):
             self.Opened_Car_Menu = False
 
             self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
-            print(self.caracteristicas)
             msgbx.showinfo(title="Selecionar Características", message="As características marcadas foram selecionadas.")
         else:
             msgbx.showinfo(title="ATENÇÃO!", message="O Menu de características já está aberto.")
     ################### FIM selec_car ###################
 
     def trein_clas(self):
+        """Treina uma rede neural"""
         if len(self.imagens) == 400:
             inicio = time.time()
             train_feat = []
@@ -290,23 +284,47 @@ class App(Frame):
             #seta o vetor de labels
             for i in range(0,400):
                 train_labels.append(int(i/100) + 1)
-        
-            #Cria o vetor com os valores a serem analisados
+
+            # Preenche matrizes auxiliares com valores de Hu e Haralick
+            mAuxHu = []   # Matriz auxiliar Hu
+            mAuxHaralick = [] # Matriz auxiliar Haralick
             for imagem in self.imagens:
-                val = self.Hu(imagem) + self.Haralick(imagem)
-                train_feat.append(val)
+                mAuxHaralick.append(self.Haralick(imagem))
+                mAuxHu.append(self.Hu(imagem))
+
+            # Normaliza valores das matrizes
+            scaler = MinMaxScaler()
+            print("Normalização Hu")
+            normHu = scaler.fit_transform(mAuxHu)
+            
+            print("Normalização Haralick")
+            normHaralick = scaler.fit_transform(mAuxHaralick)
+            
+            #Cria o vetor com os valores a serem analisados
+            for i in range(0,400):
+                train_feat.append( mAuxHaralick[i] + mAuxHu[i] )
+
+            #Dividir os dados nas 4 classes
+            Tclas1,Tclas2,Tclas3,Tclas4 = np.array_split(train_feat,4)
+            Lclas1,Lclas2,Lclas3,Lclas4 = np.array_split(train_labels,4)
+
+            #Balancea os dados em 75% treinamento e 25% testes
+            feat_train1, feat_test1, label_train1, label_test1 = train_test_split(Tclas1, Lclas1,test_size=0.25, random_state=1)
+            feat_train2, feat_test2, label_train2, label_test2 = train_test_split(Tclas2, Lclas2,test_size=0.25, random_state=1)
+            feat_train3, feat_test3, label_train3, label_test3 = train_test_split(Tclas3, Lclas3,test_size=0.25, random_state=1)
+            feat_train4, feat_test4, label_train4, label_test4 = train_test_split(Tclas4, Lclas4,test_size=0.25, random_state=1)
+
+            #Reunir os dados
+            feat_train = np.concatenate((feat_train1,feat_train2,feat_train3,feat_train4))
+            feat_test = np.concatenate((feat_test1,feat_test2,feat_test3,feat_test4))
+            label_train = np.concatenate((label_train1,label_train2,label_train3,label_train4))
+            label_test = np.concatenate((label_test1,label_test2,label_test3,label_test4))
 
             ######## Inicio rede neural #######
-            # Particionamento da base
-            X = train_feat
-            y = train_labels
             
-            X_train, X_test, y_train, y_test = train_test_split(X, y, 
-                                    test_size=0.25, random_state=0)
-            
-            self.mlp = MLPClassifier(solver='lbfgs', random_state=0)
-            self.mlp.fit(X_train, y_train)
-            y_pred = self.mlp.predict(X_test)
+            self.mlp = MLPClassifier(solver='lbfgs', random_state=5, max_iter=400, hidden_layer_sizes=[300,200])
+            self.mlp.fit(feat_train, label_train)
+            y_pred = self.mlp.predict(feat_test)
 
 
             print("Camadas da rede: {}".format(self.mlp.n_layers_))
@@ -315,18 +333,15 @@ class App(Frame):
             print("Pesos na camada de entrada: {}".format(self.mlp.coefs_[0].shape))
             print("Pesos na camada oculta: {}".format(self.mlp.coefs_[1].shape))
 
-            print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(X_train, y_train)))
-            print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(X_test, y_test)))
-
-            #print(classification_report(y_test, y_pred, target_names=class_names))
+            print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(feat_train, label_train)))
+            print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(feat_test, label_test)))
 
             # Calcula a matriz de confusão
-            cnf_matrix = confusion_matrix(y_test, y_pred)
+            cnf_matrix = confusion_matrix(label_test, y_pred)
             print(cnf_matrix)
             print(self.acuracia(cnf_matrix))
             print(self.especificidade(cnf_matrix))
             
-
             # Calcula tempo de execução
             self.tempo = time.time() - inicio
 
@@ -338,7 +353,7 @@ class App(Frame):
     def analisar_area(self):
         """Analisa a area recortada pelo usuario"""
 
-        if 'mlp' in globals():
+        if self.mlp != None:
             if self.temCrop:
                 self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
                 self.temCrop = False
@@ -347,12 +362,13 @@ class App(Frame):
 
                 inicio = time.time()
                 val = self.Hu(cropped) + self.Haralick(cropped)
-                tempo = time.time() - inicio
+                t = time.time() - inicio
 
                 val = np.array(val)
                 prediction = self.mlp.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
 
                 print(prediction)
+                self.printaValores(tempo=t,carac=val)
             else:
                 msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!") 
         else:
@@ -360,6 +376,7 @@ class App(Frame):
     ################### FIM analisar_area ###################
 
     def acuracia(self,matriz):
+        """Calcula a acuracia da rede baseado na matriz de confusao"""
         resp = 0
 
         for i in range(0,4):
@@ -369,6 +386,7 @@ class App(Frame):
     ################### FIM acuracia ###################
 
     def especificidade(self,matriz):
+        """Calcula a especificidade da rede baseado na matriz de confusão"""
         resp = 0
 
         for i in range(0,4):
@@ -377,6 +395,7 @@ class App(Frame):
                     resp+= matriz[i][j]
 
         return resp/300
+    ################### FIM especificidade ###################
 
     def deleta_canvas(self):
         """Deleta o canvas existente"""
@@ -390,7 +409,6 @@ class App(Frame):
 
     def popupmsg(self, title, msg, geometry):
         """Posta uma imagem em popup para o usuário""" 
-        #msgbx.showinfo(title=title, message=msg)
         popup = tk.Toplevel()
         popup.wm_title(title)
         popup.geometry(geometry)
@@ -467,17 +485,53 @@ class App(Frame):
         self.canvas.bind('<Button-1>', get_mouse_posn)
         self.canvas.bind('<Double-Button-1>', confirm_cut) # O usuario deve dar clique duplo para confirmar corte   
     ################### FIM select_area ###################
+
+    def printaValores(self,tempo=None,espec=None,acc=None,matriz=None,carac=None):
+        #Criação Interface
+        top = Toplevel()
+        top.title("Informações")
+        top.geometry('300x300')
+        top.lift()      #Deixa a tela corrente no topo da pilha (gerenciador de janelas)
+
+        string = ''
+        if tempo != None:
+            string += ('Tempo: \t\t%.3fs\n'%(tempo))
+        if carac.any():
+            string += ('H1:\t\t%.6f\nH2:\t\t%.6f\nH3:\t\t%.6f\nH4:\t\t%.6f\nH5:\t\t%.6f\nH6:\t\t%.6f\nH7:\t\t%.6f\n'%(carac[0],carac[1],carac[2],carac[3],carac[4],carac[5],carac[6]))
+            i = 7
+            if self.caracteristicas[0]:
+                string += ('Entropia:\t\t%.6f\n'%(carac[i]))
+                i+=1
+            if self.caracteristicas[1]:
+                string += ('Energia:\t\t%.6f\n'%(carac[i]))
+                i+=1
+            if self.caracteristicas[2]:
+                string += ('Homogeneidade:\t%.6f\n'%(carac[i]))
+                i+=1
+            if self.caracteristicas[3]:
+                string += ('Contraste:\t\t%.6f\n'%(carac[i]))
+        if espec != None:
+            string += ('Especificidade:\t\t%.6f'%(str(espec)))
+        if acc != None:
+            string += ('Precisão:\t\t%.2f'%(str(acc*100)))
+        
+        texto = Label(top, text=string)
+        texto.pack()
+    ################### FIM printaValores ###################
                
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.master.title('Trabalho de Processamento de Imagens')
+
         #Atributo zoomed inicia janela em modo tela cheia
         if system() == 'Linux':
             self.master.attributes('-zoomed', True)
         elif system() == 'Windows':
             self.master.attributes('-fullscreen', True)
+
         #Variaveis da classe
         self.imagens = []
+        self.mlp = None
         self.temLabel = False
         self.temCanvas = False
         self.temCrop = False
@@ -493,7 +547,6 @@ class App(Frame):
         self.Contraste = True
         self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
 
-
         #Tela do software
         fram = Frame(self)
         Button(fram, text="Abrir imagem", command=self.open).pack(side=LEFT)
@@ -505,7 +558,6 @@ class App(Frame):
         Button(fram, text="Selecionar Características", command=self.selec_car).pack(side=LEFT)
         Button(fram, text="Ler diretório", command=self.ler_dir).pack(side=LEFT)
         Button(fram, text="Treinar classificador", command=self.trein_clas,bg='gray').pack(side=LEFT)
-        
         fram.pack(side=TOP, fill=BOTH)
 
         #Área em que a imagem ficará presente
@@ -517,6 +569,10 @@ class App(Frame):
         self.la2.pack(side=BOTTOM)
 
         self.pack()
+
+        ######TESTE
+        #self.ler_dir()
+        #self.trein_clas()
         
 if __name__ == "__main__":
     app = App(); app.configure(bg='white',); app.mainloop()
