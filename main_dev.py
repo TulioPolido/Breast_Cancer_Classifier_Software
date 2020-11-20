@@ -289,16 +289,17 @@ class App(Frame):
                 val = self.Hu(imagem) + self.Haralick(imagem)
                 train_feat.append(val)
 
-            #balanceando as imagens teste por classe
+            #Dividir os dados nas 4 classes
             Tclas1,Tclas2,Tclas3,Tclas4 = np.array_split(train_feat,4)
             Lclas1,Lclas2,Lclas3,Lclas4 = np.array_split(train_labels,4)
 
-            #Dividir os dados em 75% treinamento e 25% testes
+            #Balancea os dados em 75% treinamento e 25% testes
             feat_train1, feat_test1, label_train1, label_test1 = train_test_split(Tclas1, Lclas1,test_size=0.25, random_state=1)
             feat_train2, feat_test2, label_train2, label_test2 = train_test_split(Tclas2, Lclas2,test_size=0.25, random_state=1)
             feat_train3, feat_test3, label_train3, label_test3 = train_test_split(Tclas3, Lclas3,test_size=0.25, random_state=1)
             feat_train4, feat_test4, label_train4, label_test4 = train_test_split(Tclas4, Lclas4,test_size=0.25, random_state=1)
 
+            #Reunir os dados
             feat_train = np.concatenate((feat_train1,feat_train2,feat_train3,feat_train4))
             feat_test = np.concatenate((feat_test1,feat_test2,feat_test3,feat_test4))
             label_train = np.concatenate((label_train1,label_train2,label_train3,label_train4))
@@ -474,30 +475,30 @@ class App(Frame):
         #Criação Interface
         top = Toplevel()
         top.title("Informações")
-        top.geometry('200x200')
+        top.geometry('300x300')
         top.lift()      #Deixa a tela corrente no topo da pilha (gerenciador de janelas)
 
         string = ''
         if tempo != None:
-            string += ('Tempo: %.3fs\n'%(tempo))
+            string += ('Tempo: \t\t%.3fs\n'%(tempo))
         if carac.any():
-            string += ('H1:%.6f\nH2:%.6f\nH3:%.6f\nH4:%.6f\nH5:%.6f\nH6:%.6f\nH7:%.6f\n'%(carac[0],carac[1],carac[2],carac[3],carac[4],carac[5],carac[6]))
+            string += ('H1:\t\t%.6f\nH2:\t\t%.6f\nH3:\t\t%.6f\nH4:\t\t%.6f\nH5:\t\t%.6f\nH6:\t\t%.6f\nH7:\t\t%.6f\n'%(carac[0],carac[1],carac[2],carac[3],carac[4],carac[5],carac[6]))
             i = 7
             if self.caracteristicas[0]:
-                string += ('Entropia: %.6f\n'%(carac[i]))
+                string += ('Entropia:\t\t%.6f\n'%(carac[i]))
                 i+=1
             if self.caracteristicas[1]:
-                string += ('Energia: %.6f\n'%(carac[i]))
+                string += ('Energia:\t\t%.6f\n'%(carac[i]))
                 i+=1
             if self.caracteristicas[2]:
-                string += ('Homogeneidade: %.6f\n'%(carac[i]))
+                string += ('Homogeneidade:\t%.6f\n'%(carac[i]))
                 i+=1
             if self.caracteristicas[3]:
-                string += ('Contraste: %.6f\n'%(carac[i]))
+                string += ('Contraste:\t\t%.6f\n'%(carac[i]))
         if espec != None:
-            string += ('Especificidade: %.6f'%(str(espec)))
+            string += ('Especificidade:\t\t%.6f'%(str(espec)))
         if acc != None:
-            string += ('Precisão: %.2f'%(str(acc*100)))
+            string += ('Precisão:\t\t%.2f'%(str(acc*100)))
         
         texto = Label(top, text=string)
         texto.pack()
