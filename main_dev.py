@@ -329,7 +329,7 @@ class App(Frame):
             # Calcula tempo de execução
             self.tempo = time.time() - inicio
 
-            ###Teste
+            #Exibindo informações
             self.printaValores(tempo=self.tempo,matriz=cnf_matrix,espec=especificidade,acc=acuracia)
 
             print('Tempo de execução: {0}'.format(self.tempo))
@@ -563,10 +563,6 @@ class App(Frame):
         self.la2.pack(side=BOTTOM)
 
         self.pack()
-
-        ######TESTE
-        self.ler_dir()
-        self.trein_clas()
         
 if __name__ == "__main__":
     app = App(); app.configure(bg='white',); app.mainloop()
