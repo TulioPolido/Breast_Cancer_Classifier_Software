@@ -289,17 +289,26 @@ class App(Frame):
                 val = self.Hu(imagem) + self.Haralick(imagem)
                 train_feat.append(val)
 
+            #balanceando as imagens teste por classe
+            Tclas1,Tclas2,Tclas3,Tclas4 = np.array_split(train_feat,4)
+            Lclas1,Lclas2,Lclas3,Lclas4 = np.array_split(train_labels,4)
+
+            #Dividir os dados em 75% treinamento e 25% testes
+            feat_train1, feat_test1, label_train1, label_test1 = train_test_split(Tclas1, Lclas1,test_size=0.25, random_state=1)
+            feat_train2, feat_test2, label_train2, label_test2 = train_test_split(Tclas2, Lclas2,test_size=0.25, random_state=1)
+            feat_train3, feat_test3, label_train3, label_test3 = train_test_split(Tclas3, Lclas3,test_size=0.25, random_state=1)
+            feat_train4, feat_test4, label_train4, label_test4 = train_test_split(Tclas4, Lclas4,test_size=0.25, random_state=1)
+
+            feat_train = np.concatenate((feat_train1,feat_train2,feat_train3,feat_train4))
+            feat_test = np.concatenate((feat_test1,feat_test2,feat_test3,feat_test4))
+            label_train = np.concatenate((label_train1,label_train2,label_train3,label_train4))
+            label_test = np.concatenate((label_test1,label_test2,label_test3,label_test4))
+
             ######## Inicio rede neural #######
-            # Particionamento da base
-            X = train_feat
-            y = train_labels
             
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
-            
-            #Cria rede neural
             self.mlp = MLPClassifier(solver='lbfgs', random_state=5, max_iter=400, hidden_layer_sizes=[200,300])
-            self.mlp.fit(X_train, y_train)
-            y_pred = self.mlp.predict(X_test)
+            self.mlp.fit(feat_train, label_train)
+            y_pred = self.mlp.predict(feat_test)
 
 
             print("Camadas da rede: {}".format(self.mlp.n_layers_))
@@ -308,11 +317,11 @@ class App(Frame):
             print("Pesos na camada de entrada: {}".format(self.mlp.coefs_[0].shape))
             print("Pesos na camada oculta: {}".format(self.mlp.coefs_[1].shape))
 
-            print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(X_train, y_train)))
-            print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(X_test, y_test)))
+            print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(feat_train, label_train)))
+            print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(feat_test, label_test)))
 
             # Calcula a matriz de confusão
-            cnf_matrix = confusion_matrix(y_test, y_pred)
+            cnf_matrix = confusion_matrix(label_test, y_pred)
             print(cnf_matrix)
             print(self.acuracia(cnf_matrix))
             print(self.especificidade(cnf_matrix))
