@@ -21,23 +21,19 @@ circulares C1, C2, C4, C8 e C16
 	
 [X] 75% das imagens devem ser escolhidas de forma aleatória, mas balanceadas entre as classes. 
 
-[O] O tempo de execução deve ser medido e exibido na interface.
+[ ] O tempo de execução deve ser medido e exibido na interface.
 
 
 3) 
 [X] Classificar os 25% das imagens restantes. 
 
-[ ] O tempo de execução deve ser medido e exibido na interface, 
+[ ] O tempo de execução deve ser medido e exibido na interface, juntamente com métricas de sensibilidade média e especificidade média
 
-[ ] juntamente com a matriz de confusão e as 
+[X] Para 4 classes com 25 imagens por classe teremos a matriz de confusão 4x4, M, onde a linha é a classe correta e a coluna a classe estimada
 
-[ ] métricas de sensibilidade média e especificidade média
+[X] A sensibilidade média = acurácia = Σ i=1..4 M i,i /100 e a 
 
-[ ] Para 4 classes com 25 imagens por classe teremos a matriz de confusão 4x4, M, onde a linha é a classe correta e a coluna a classe estimada
-
-[ ] A sensibilidade média = acurácia = Σ i=1..4 M i,i /100 e a 
-
-[ ] especificidade = 1- Σ i=1..4 Σ j≠i M j,i / 300.
+[X] especificidade = 1- Σ i=1..4 Σ j≠i M j,i / 300.
 
 4) 
 [X] Classificar a região selecionada com o mouse ou a imagem carregada
