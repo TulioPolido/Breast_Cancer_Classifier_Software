@@ -127,7 +127,6 @@ class App(Frame):
                     self.width = self.im.width
                     self.height = self.im.height
                     self.chg_image()
-
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Finalize a seleção de região antes de abrir outra imagem!")
     ################### FIM open ###################
@@ -171,7 +170,8 @@ class App(Frame):
     def ler_dir(self):
         """Le o diretório e 4 subdiretórios para carregar as imagens para a memória"""
         try:
-            folder = filedialog.askdirectory()
+            #folder = filedialog.askdirectory()
+            folder = './imagens'
 
             for i in range(1,5):
                 subFolder = folder + '/' + str(i)
@@ -272,7 +272,6 @@ class App(Frame):
             self.Opened_Car_Menu = False
 
             self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
-            print(self.caracteristicas)
             msgbx.showinfo(title="Selecionar Características", message="As características marcadas foram selecionadas.")
         else:
             msgbx.showinfo(title="ATENÇÃO!", message="O Menu de características já está aberto.")
@@ -302,6 +301,7 @@ class App(Frame):
             X_train, X_test, y_train, y_test = train_test_split(X, y, 
                                     test_size=0.25, random_state=0)
             
+            #Cria rede neural
             self.mlp = MLPClassifier(solver='lbfgs', random_state=5, max_iter=400, hidden_layer_sizes=[200,300])
             self.mlp.fit(X_train, y_train)
             y_pred = self.mlp.predict(X_test)
@@ -333,7 +333,7 @@ class App(Frame):
     def analisar_area(self):
         """Analisa a area recortada pelo usuario"""
 
-        if 'mlp' in globals():
+        if self.mlp != None:
             if self.temCrop:
                 self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
                 self.temCrop = False
@@ -342,12 +342,13 @@ class App(Frame):
 
                 inicio = time.time()
                 val = self.Hu(cropped) + self.Haralick(cropped)
-                tempo = time.time() - inicio
+                t = time.time() - inicio
 
                 val = np.array(val)
                 prediction = self.mlp.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
 
                 print(prediction)
+                self.printaValores(tempo=t,carac=val)
             else:
                 msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!") 
         else:
@@ -374,6 +375,7 @@ class App(Frame):
                     resp+= matriz[i][j]
 
         return resp/300
+    ################### FIM especificidade ###################
 
     def deleta_canvas(self):
         """Deleta o canvas existente"""
@@ -468,18 +470,48 @@ class App(Frame):
         #Criação Interface
         top = Toplevel()
         top.title("Informações")
+        top.geometry('200x200')
         top.lift()      #Deixa a tela corrente no topo da pilha (gerenciador de janelas)
+
+        string = ''
+        if tempo != None:
+            string += ('Tempo: %.3fs\n'%(tempo))
+        if carac.any():
+            string += ('H1:%.6f\nH2:%.6f\nH3:%.6f\nH4:%.6f\nH5:%.6f\nH6:%.6f\nH7:%.6f\n'%(carac[0],carac[1],carac[2],carac[3],carac[4],carac[5],carac[6]))
+            i = 7
+            if self.caracteristicas[0]:
+                string += ('Entropia: %.6f\n'%(carac[i]))
+                i+=1
+            if self.caracteristicas[1]:
+                string += ('Energia: %.6f\n'%(carac[i]))
+                i+=1
+            if self.caracteristicas[2]:
+                string += ('Homogeneidade: %.6f\n'%(carac[i]))
+                i+=1
+            if self.caracteristicas[3]:
+                string += ('Contraste: %.6f\n'%(carac[i]))
+        if espec != None:
+            string += ('Especificidade: %.6f'%(str(espec)))
+        if acc != None:
+            string += ('Precisão: %.2f'%(str(acc*100)))
+        
+        texto = Label(top, text=string)
+        texto.pack()
+    ################### FIM printaValores ###################
                
     def __init__(self, master=None):
         Frame.__init__(self, master)
         self.master.title('Trabalho de Processamento de Imagens')
+
         #Atributo zoomed inicia janela em modo tela cheia
         if system() == 'Linux':
             self.master.attributes('-zoomed', True)
         elif system() == 'Windows':
             self.master.attributes('-fullscreen', True)
+
         #Variaveis da classe
         self.imagens = []
+        self.mlp = None
         self.temLabel = False
         self.temCanvas = False
         self.temCrop = False
@@ -495,7 +527,6 @@ class App(Frame):
         self.Contraste = True
         self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
 
-
         #Tela do software
         fram = Frame(self)
         Button(fram, text="Abrir imagem", command=self.open).pack(side=LEFT)
@@ -507,7 +538,6 @@ class App(Frame):
         Button(fram, text="Selecionar Características", command=self.selec_car).pack(side=LEFT)
         Button(fram, text="Ler diretório", command=self.ler_dir).pack(side=LEFT)
         Button(fram, text="Treinar classificador", command=self.trein_clas,bg='gray').pack(side=LEFT)
-        
         fram.pack(side=TOP, fill=BOTH)
 
         #Área em que a imagem ficará presente
@@ -519,6 +549,10 @@ class App(Frame):
         self.la2.pack(side=BOTTOM)
 
         self.pack()
+
+        ######TESTE
+        self.ler_dir()
+        self.trein_clas()
         
 if __name__ == "__main__":
     app = App(); app.configure(bg='white',); app.mainloop()
