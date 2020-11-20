@@ -2,23 +2,19 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import * 
 from PIL import Image, ImageTk
+from platform import system
+import time
 import os
 import pydicom
-import math
 import cv2
 import mahotas as mt
 import matplotlib.pyplot as plt
 import tkinter.messagebox as msgbx
 import numpy as np
-from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-import time
-from platform import system
-import pandas as pd
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import LabelEncoder
+
 np.set_printoptions(precision=2)
 
 class App(Frame):
@@ -298,8 +294,7 @@ class App(Frame):
             X = train_feat
             y = train_labels
             
-            X_train, X_test, y_train, y_test = train_test_split(X, y, 
-                                    test_size=0.25, random_state=0)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=0)
             
             #Cria rede neural
             self.mlp = MLPClassifier(solver='lbfgs', random_state=5, max_iter=400, hidden_layer_sizes=[200,300])
