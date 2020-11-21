@@ -423,6 +423,7 @@ class App(Frame):
             self.temCanvas = False
             self.canvas.delete("all")
             self.canvas.destroy()
+            self.la.config(width=1,height=1,bg='#D8D8D8')
         else:
             msgbx.showinfo(title="Seleção de Região", message="Nenhuma imagem selecionada para ser recortada")
     ################### FIM deleta_canvas ###################
