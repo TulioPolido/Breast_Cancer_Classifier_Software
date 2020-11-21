@@ -25,7 +25,7 @@ class App(Frame):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #converte para cinza
         final = gray/(256/self.scale_gray) #rescalona os valores para o teto de 32
         final = final.astype(int) #converte para inteiros
-        _,gray = cv2.threshold(gray, int(self.scale_gray/2), init(self.scale_gray), cv2.THRESH_BINARY) #converte para binario
+        _,gray = cv2.threshold(gray, int(self.scale_gray/2), int(self.scale_gray), cv2.THRESH_BINARY) #converte para binario
 
         moments = cv2.moments(gray) #calcula os momentos da imagem
         huMoments = cv2.HuMoments(moments) #calcula os momentos de Hu
