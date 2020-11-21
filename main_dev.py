@@ -14,7 +14,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import MinMaxScaler
+from math import ceil, copysign, log10
 
 np.set_printoptions(precision=2)
 
@@ -24,24 +24,29 @@ class App(Frame):
     def Hu(self, image):
         """Calcula os momentos de Hu para a imagem e retorna uma lista com os resultados"""
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #converte para cinza
-        final = gray/8 #rescalona os valores para o teto de 32
-        final = final.astype(int) #converte para inteiros
-        _,gray = cv2.threshold(gray, 16, 32, cv2.THRESH_BINARY) #converte para binario
+        final = gray/(256/self.scale_gray) #rescalona os valores para o teto de 32
+        #final = final.astype(int) #converte para inteiros
+        #_,gray = cv2.threshold(gray, int(self.scale_gray/2), int(self.scale_gray), cv2.THRESH_BINARY) #converte para binario
 
-        moments = cv2.moments(gray) #calcula os momentos da imagem
+        # Arredonda os valores fracionados
+        for x in range(len(final)):
+            for y in range(len(final[0])):
+                final[x][y] = ceil(final[x][y])
+
+        moments = cv2.moments(final) #calcula os momentos da imagem
         huMoments = cv2.HuMoments(moments) #calcula os momentos de Hu
-        
-        result = []
-        
-        #adiciona os valores de Hu para uma lista
-        result.append(huMoments[0][0])
-        result.append(huMoments[1][0])
-        result.append(huMoments[2][0])
-        result.append(huMoments[3][0])
-        result.append(huMoments[4][0])
-        result.append(huMoments[5][0])
-        result.append(huMoments[6][0])
 
+        result = []
+        w = 1.00000000023
+        #adiciona os valores normalizados de Hu para uma lista
+        result.append(-1*copysign(1.0, huMoments[0][0])*log10(abs(huMoments[0][0])+w))
+        result.append(-1*copysign(1.0, huMoments[1][0])*log10(abs(huMoments[1][0])+w))
+        result.append(-1*copysign(1.0, huMoments[2][0])*log10(abs(huMoments[2][0])+w))
+        result.append(-1*copysign(1.0, huMoments[3][0])*log10(abs(huMoments[3][0])+w))
+        result.append(-1*copysign(1.0, huMoments[4][0])*log10(abs(huMoments[4][0])+w))
+        result.append(-1*copysign(1.0, huMoments[5][0])*log10(abs(huMoments[5][0])+w))
+        result.append(-1*copysign(1.0, huMoments[6][0])*log10(abs(huMoments[6][0])+w))
+        
         return result
     ################### FIM Hu ###################
     
@@ -76,7 +81,6 @@ class App(Frame):
                 resultado.append(parcial)
             
             dist*=2
-
         return resultado
     ################### FIM Haralick ###################
 
@@ -196,6 +200,7 @@ class App(Frame):
 
             #Criação Interface
             top = Toplevel()
+            top.geometry('225x325')
             top.title("Selecionar Características")
             top.lift()      #Deixa a tela corrente no topo da pilha (gerenciador de janelas)
 
@@ -232,15 +237,39 @@ class App(Frame):
             if(Contraste):
                 C4.select()
 
-            #Tela do Menu
+            #Tela das Características
             C1.pack()
             C2.pack()
             C3.pack()
             C4.pack()
+
+            l = Label(top, text='\n\nSelecionar Escala de Cinza:\n')
+            l.pack()
+            scale = IntVar()
+
+            R1 = Radiobutton(top, text='8',value=8,variable=scale)
+            R2 = Radiobutton(top, text='16',value=16,variable=scale)
+            R3 = Radiobutton(top, text='32',value=32,variable=scale)
+
+            #Verifica qual o último valor definido para Escala de Cinza
+            if(self.scale_gray == 8):
+                R1.select()
+
+            if(self.scale_gray == 16):
+                R2.select()
+
+            if(self.scale_gray == 32):
+                R3.select()
+
+            #Tela da Escala de Cinza
+            R1.pack()
+            R2.pack()
+            R3.pack()
             
             def on_closing():
                 top.quit()
                 top.destroy()
+            ################### FIM on_closing ###################   
 
             top.protocol("WM_DELETE_WINDOW", on_closing)
             top.mainloop()
@@ -266,14 +295,23 @@ class App(Frame):
             else:
                 self.Contraste = False
 
-            self.Opened_Car_Menu = False
+            if (scale.get() == 8):
+                self.scale_gray = 8
+            
+            if (scale.get() == 16):
+                self.scale_gray = 16
 
+            if (scale.get() == 32):
+                self.scale_gray = 32
+            
+            self.Opened_Car_Menu = False
+            
             self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
             msgbx.showinfo(title="Selecionar Características", message="As características marcadas foram selecionadas.")
         else:
             msgbx.showinfo(title="ATENÇÃO!", message="O Menu de características já está aberto.")
     ################### FIM selec_car ###################
-
+    
     def trein_clas(self):
         """Treina uma rede neural"""
         if len(self.imagens) == 400:
@@ -285,24 +323,10 @@ class App(Frame):
             for i in range(0,400):
                 train_labels.append(int(i/100) + 1)
 
-            # Preenche matrizes auxiliares com valores de Hu e Haralick
-            mAuxHu = []   # Matriz auxiliar Hu
-            mAuxHaralick = [] # Matriz auxiliar Haralick
-            for imagem in self.imagens:
-                mAuxHaralick.append(self.Haralick(imagem))
-                mAuxHu.append(self.Hu(imagem))
-
-            # Normaliza valores das matrizes
-            scaler = MinMaxScaler()
-            print("Normalização Hu")
-            normHu = scaler.fit_transform(mAuxHu)
-            
-            print("Normalização Haralick")
-            normHaralick = scaler.fit_transform(mAuxHaralick)
-            
             #Cria o vetor com os valores a serem analisados
-            for i in range(0,400):
-                train_feat.append( mAuxHaralick[i] + mAuxHu[i] )
+            for imagem in self.imagens:
+                val = self.Hu(imagem) + self.Haralick(imagem)
+                train_feat.append(val)
 
             #Dividir os dados nas 4 classes
             Tclas1,Tclas2,Tclas3,Tclas4 = np.array_split(train_feat,4)
@@ -322,7 +346,7 @@ class App(Frame):
 
             ######## Inicio rede neural #######
             
-            self.mlp = MLPClassifier(solver='lbfgs', random_state=5, max_iter=400, hidden_layer_sizes=[300,200])
+            self.mlp = MLPClassifier(solver='lbfgs', random_state=5, max_iter=400, hidden_layer_sizes=[200,300])
             self.mlp.fit(feat_train, label_train)
             y_pred = self.mlp.predict(feat_test)
 
@@ -338,12 +362,14 @@ class App(Frame):
 
             # Calcula a matriz de confusão
             cnf_matrix = confusion_matrix(label_test, y_pred)
-            print(cnf_matrix)
-            print(self.acuracia(cnf_matrix))
-            print(self.especificidade(cnf_matrix))
+            acuracia = self.acuracia(cnf_matrix)
+            especificidade = self.especificidade(cnf_matrix)
             
             # Calcula tempo de execução
             self.tempo = time.time() - inicio
+
+            #Exibindo informações
+            self.printaValores(tempo=self.tempo,matriz=cnf_matrix,espec=especificidade,acc=acuracia)
 
             print('Tempo de execução: {0}'.format(self.tempo))
         else:
@@ -355,7 +381,7 @@ class App(Frame):
 
         if self.mlp != None:
             if self.temCrop:
-                self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
+                self.la2.config(image='',bg="#D8D8D8",width=0,height=0) #Remove a imagem atras do canvas
                 self.temCrop = False
 
                 cropped = cv2.imread('.crop.png')
@@ -403,6 +429,7 @@ class App(Frame):
             self.temCanvas = False
             self.canvas.delete("all")
             self.canvas.destroy()
+            self.la.config(width=1,height=1,bg='#D8D8D8')
         else:
             msgbx.showinfo(title="Seleção de Região", message="Nenhuma imagem selecionada para ser recortada")
     ################### FIM deleta_canvas ###################
@@ -468,14 +495,14 @@ class App(Frame):
             aux_img = Image.open(self.filename)
             aux_img = aux_img.resize((self.width, self.height))
             img = ImageTk.PhotoImage(aux_img)
-            self.canvas = tk.Canvas(self.la, width=img.width(), height=img.height(), borderwidth=0, highlightthickness=0)
+            self.canvas = tk.Canvas(self.la,bg='#D8D8D8', width=img.width(), height=img.height(), borderwidth=0, highlightthickness=0)
             self.canvas.pack(expand=True)
             self.canvas.img = img  
             self.canvas.create_image(0, 0, image=img, anchor=tk.NW)
             self.temCanvas = True
 
             rect_id = self.canvas.create_rectangle(topx, topy, botx, boty, fill='', outline='LimeGreen', width=2) # Desenha retangulo verde em cima da imagem
-            self.la.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
+            self.la.config(image='',bg="#D8D8D8",width=0,height=0) #Remove a imagem atras do canvas
             self.temLabel = False
         elif not self.temLabel:
             msgbx.showinfo(title="ATENÇÃO", message="Selecione uma imagem antes!")
@@ -490,30 +517,37 @@ class App(Frame):
         #Criação Interface
         top = Toplevel()
         top.title("Informações")
-        top.geometry('300x300')
+        top.geometry('400x400')
         top.lift()      #Deixa a tela corrente no topo da pilha (gerenciador de janelas)
 
         string = ''
-        if tempo != None:
-            string += ('Tempo: \t\t%.3fs\n'%(tempo))
-        if carac.any():
-            string += ('H1:\t\t%.6f\nH2:\t\t%.6f\nH3:\t\t%.6f\nH4:\t\t%.6f\nH5:\t\t%.6f\nH6:\t\t%.6f\nH7:\t\t%.6f\n'%(carac[0],carac[1],carac[2],carac[3],carac[4],carac[5],carac[6]))
+        if tempo is not None:
+            string += ('\nTempo: \t\t%.3fs\n'%(tempo))
+        if carac is not None:
+            string += ('\nH1:\t\t%.6f\nH2:\t\t%.6f\nH3:\t\t%.6f\nH4:\t\t%.6f\nH5:\t\t%.6f\nH6:\t\t%.6f\nH7:\t\t%.6f\n'%(carac[0],carac[1],carac[2],carac[3],carac[4],carac[5],carac[6]))
             i = 7
             if self.caracteristicas[0]:
-                string += ('Entropia:\t\t%.6f\n'%(carac[i]))
+                string += ('\nEntropia:\t\t%.6f\n'%(carac[i]))
                 i+=1
             if self.caracteristicas[1]:
-                string += ('Energia:\t\t%.6f\n'%(carac[i]))
+                string += ('\nEnergia:\t\t%.6f\n'%(carac[i]))
                 i+=1
             if self.caracteristicas[2]:
-                string += ('Homogeneidade:\t%.6f\n'%(carac[i]))
+                string += ('\nHomogeneidade:\t%.6f\n'%(carac[i]))
                 i+=1
             if self.caracteristicas[3]:
-                string += ('Contraste:\t\t%.6f\n'%(carac[i]))
-        if espec != None:
-            string += ('Especificidade:\t\t%.6f'%(str(espec)))
-        if acc != None:
-            string += ('Precisão:\t\t%.2f'%(str(acc*100)))
+                string += ('\nContraste:\t\t%.6f\n'%(carac[i]))
+        if espec is not None:
+            string += ('\nEspecificidade:\t%.6f\n'%(espec))
+        if acc is not None:
+            string += ('\nPrecisão:\t\t%.1f%%\n'%(acc*100))
+        if matriz is not None:
+            string += ('\nMatriz de confusão:\n\n\t1\t2\t3\t4\n___________________________________________________\n1|\t%d\t%d\t%d\t%d\n2|\t%d\t%d\t%d\t%d\n3|\t%d\t%d\t%d\t%d\n 4|\t%d\t%d\t%d\t%d\n'\
+                        %(matriz[0][0],matriz[0][1],matriz[0][2],matriz[0][3],\
+                        matriz[1][0],matriz[1][1],matriz[1][2],matriz[1][3],\
+                        matriz[2][0],matriz[2][1],matriz[2][2],matriz[2][3],\
+                        matriz[3][0],matriz[3][1],matriz[3][2],matriz[3][3],))
+
         
         texto = Label(top, text=string)
         texto.pack()
@@ -540,6 +574,7 @@ class App(Frame):
         self.imgCrop = None
         self.img_atual = None
         self.tempo = 0
+        self.scale_gray = 8
         self.Opened_Car_Menu = False
         self.Entropia = True
         self.Energia = True
@@ -554,25 +589,23 @@ class App(Frame):
         Button(fram, text="Zoom Out", command=self.zoom_out).pack(side=LEFT)
         Button(fram, text="Selecionar Região",  command=self.select_area).pack(side=LEFT)
         Button(fram, text="Finalizar seleção",  command=self.deleta_canvas).pack(side=LEFT)
-        Button(fram, text="Analisar área selecionada", command=self.analisar_area,bg='gray').pack(side=LEFT)
+        Button(fram, text="Analisar área selecionada", command=self.analisar_area).pack(side=LEFT)
         Button(fram, text="Selecionar Características", command=self.selec_car).pack(side=LEFT)
         Button(fram, text="Ler diretório", command=self.ler_dir).pack(side=LEFT)
-        Button(fram, text="Treinar classificador", command=self.trein_clas,bg='gray').pack(side=LEFT)
+        Button(fram, text="Treinar classificador", command=self.trein_clas).pack(side=LEFT)
         fram.pack(side=TOP, fill=BOTH)
 
         #Área em que a imagem ficará presente
         self.la = Label(self)
+        self.la.config(bg='#D8D8D8')
         self.la.pack()
 
         #Área que o recorte ficará presente
         self.la2 = Label(self)
+        self.la2.config(bg='#D8D8D8')
         self.la2.pack(side=BOTTOM)
 
         self.pack()
-
-        ######TESTE
-        #self.ler_dir()
-        #self.trein_clas()
         
 if __name__ == "__main__":
-    app = App(); app.configure(bg='white',); app.mainloop()
+    app = App(); app.configure(bg='#D8D8D8',); app.mainloop()
