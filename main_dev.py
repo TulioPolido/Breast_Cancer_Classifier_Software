@@ -455,7 +455,7 @@ class App(Frame):
             aux_img = Image.open(self.filename)
             aux_img = aux_img.resize((self.width, self.height))
             img = ImageTk.PhotoImage(aux_img)
-            self.canvas = tk.Canvas(self.la, width=img.width(), height=img.height(), borderwidth=0, highlightthickness=0)
+            self.canvas = tk.Canvas(self.la,bg='#FFFFFF', width=img.width(), height=img.height(), borderwidth=0, highlightthickness=0)
             self.canvas.pack(expand=True)
             self.canvas.img = img  
             self.canvas.create_image(0, 0, image=img, anchor=tk.NW)
@@ -556,13 +556,15 @@ class App(Frame):
 
         #Área em que a imagem ficará presente
         self.la = Label(self)
+        self.la.config(bg='#FFFFFF')
         self.la.pack()
 
         #Área que o recorte ficará presente
         self.la2 = Label(self)
+        self.la2.config(bg='#FFFFFF')
         self.la2.pack(side=BOTTOM)
 
         self.pack()
         
 if __name__ == "__main__":
-    app = App(); app.configure(bg='white',); app.mainloop()
+    app = App(); app.configure(bg='#FFFFFF',); app.mainloop()
