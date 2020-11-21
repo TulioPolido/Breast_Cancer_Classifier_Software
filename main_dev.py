@@ -23,9 +23,9 @@ class App(Frame):
     def Hu(self, image):
         """Calcula os momentos de Hu para a imagem e retorna uma lista com os resultados"""
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #converte para cinza
-        final = gray/8 #rescalona os valores para o teto de 32
+        final = gray/(256/self.scale_gray) #rescalona os valores para o teto de 32
         final = final.astype(int) #converte para inteiros
-        _,gray = cv2.threshold(gray, 16, 32, cv2.THRESH_BINARY) #converte para binario
+        _,gray = cv2.threshold(gray, int(self.scale_gray/2), init(self.scale_gray), cv2.THRESH_BINARY) #converte para binario
 
         moments = cv2.moments(gray) #calcula os momentos da imagem
         huMoments = cv2.HuMoments(moments) #calcula os momentos de Hu
@@ -195,6 +195,7 @@ class App(Frame):
 
             #Criação Interface
             top = Toplevel()
+            top.geometry('225x325')
             top.title("Selecionar Características")
             top.lift()      #Deixa a tela corrente no topo da pilha (gerenciador de janelas)
 
@@ -231,11 +232,34 @@ class App(Frame):
             if(Contraste):
                 C4.select()
 
-            #Tela do Menu
+            #Tela das Características
             C1.pack()
             C2.pack()
             C3.pack()
             C4.pack()
+
+            l = Label(top, text='\n\nSelecionar Escala de Cinza:\n')
+            l.pack()
+            scale = IntVar()
+
+            R1 = Radiobutton(top, text='8',value=8,variable=scale)
+            R2 = Radiobutton(top, text='16',value=16,variable=scale)
+            R3 = Radiobutton(top, text='32',value=32,variable=scale)
+
+            #Verifica qual o último valor definido para Escala de Cinza
+            if(self.scale_gray == 8):
+                R1.select()
+
+            if(self.scale_gray == 16):
+                R2.select()
+
+            if(self.scale_gray == 32):
+                R3.select()
+
+            #Tela da Escala de Cinza
+            R1.pack()
+            R2.pack()
+            R3.pack()
             
             def on_closing():
                 top.quit()
@@ -266,46 +290,23 @@ class App(Frame):
             else:
                 self.Contraste = False
 
-            self.Opened_Car_Menu = False
+            if (scale.get() == 8):
+                self.scale_gray = 8
+            
+            if (scale.get() == 16):
+                self.scale_gray = 16
 
+            if (scale.get() == 32):
+                self.scale_gray = 32
+            
+            self.Opened_Car_Menu = False
+            
             self.caracteristicas = [self.Entropia, self.Energia, self.Homogeneidade, self.Contraste]
             msgbx.showinfo(title="Selecionar Características", message="As características marcadas foram selecionadas.")
         else:
             msgbx.showinfo(title="ATENÇÃO!", message="O Menu de características já está aberto.")
     ################### FIM selec_car ###################
-    '''
-    def selec_gray_scale():
-        
-        top = Toplevel
-        top.title("Selecionar Escala de Cinza")
-        top.lift()
-
-        scale = IntVar()
-
-        R1 = Radiobutton(text='8',value=8,variable=scale).pack(anchor=W)
-        
-        R2 = Radiobutton(text='16',value=16,variable=scale).pack(anchor=W)
-
-        R3 = Radiobutton(text='32',value=32,variable=scale).pack(anchor=W)
-        
-        def on_closing():
-            top.quit()
-            top.destroy()
-        ################### FIM on_closing ###################   
-
-        top.protocol("WM_DELETE_WINDOW", on_closing)
-        mainloop()
-
-        if (scale.get() == 8):
-            self.scale_gray = 8
-            
-        if (scale.get() == 16):
-            self.scale_gray = 32
-
-        if (scale.get() == 32):
-            self.scale_gray = 32
-    ################### FIM selec_gray_scale ###################  
-    '''
+    
     def trein_clas(self):
         """Treina uma rede neural"""
         if len(self.imagens) == 400:
@@ -423,6 +424,7 @@ class App(Frame):
             self.temCanvas = False
             self.canvas.delete("all")
             self.canvas.destroy()
+            self.la.config(width=1,height=1,bg='#D8D8D8')
         else:
             msgbx.showinfo(title="Seleção de Região", message="Nenhuma imagem selecionada para ser recortada")
     ################### FIM deleta_canvas ###################
@@ -567,6 +569,7 @@ class App(Frame):
         self.imgCrop = None
         self.img_atual = None
         self.tempo = 0
+        self.scale_gray = 8
         self.Opened_Car_Menu = False
         self.Entropia = True
         self.Energia = True
