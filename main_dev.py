@@ -240,6 +240,7 @@ class App(Frame):
             def on_closing():
                 top.quit()
                 top.destroy()
+            ################### FIM on_closing ###################   
 
             top.protocol("WM_DELETE_WINDOW", on_closing)
             top.mainloop()
@@ -272,6 +273,32 @@ class App(Frame):
         else:
             msgbx.showinfo(title="ATENÇÃO!", message="O Menu de características já está aberto.")
     ################### FIM selec_car ###################
+
+    def selec_gray_scale():
+        
+        top = Toplevel
+        top.title("Selecionar Escala de Cinza")
+        top.lift()
+
+        scale = IntVar()
+
+        R1 = Radiobutton(text='8',value=8,variable=scale,\
+                         command=pinta).pack(anchor=W)
+        
+        R2 = Radiobutton(text='16',value=16,variable=scale,\
+                         command=pinta).pack(anchor=W)
+
+        R3 = Radiobutton(text='32',value=32,variable=scale,\
+                         command=pinta).pack(anchor=W)
+        
+        def on_closing():
+            top.quit()
+            top.destroy()
+        ################### FIM on_closing ###################   
+
+        top.protocol("WM_DELETE_WINDOW", on_closing)
+        mainloop()
+    ################### FIM selec_gray_scale ###################        
 
     def trein_clas(self):
         """Treina uma rede neural"""
@@ -548,10 +575,10 @@ class App(Frame):
         Button(fram, text="Zoom Out", command=self.zoom_out).pack(side=LEFT)
         Button(fram, text="Selecionar Região",  command=self.select_area).pack(side=LEFT)
         Button(fram, text="Finalizar seleção",  command=self.deleta_canvas).pack(side=LEFT)
-        Button(fram, text="Analisar área selecionada", command=self.analisar_area,bg='gray').pack(side=LEFT)
+        Button(fram, text="Analisar área selecionada", command=self.analisar_area).pack(side=LEFT)
         Button(fram, text="Selecionar Características", command=self.selec_car).pack(side=LEFT)
         Button(fram, text="Ler diretório", command=self.ler_dir).pack(side=LEFT)
-        Button(fram, text="Treinar classificador", command=self.trein_clas,bg='gray').pack(side=LEFT)
+        Button(fram, text="Treinar classificador", command=self.trein_clas).pack(side=LEFT)
         fram.pack(side=TOP, fill=BOTH)
 
         #Área em que a imagem ficará presente
