@@ -273,7 +273,7 @@ class App(Frame):
         else:
             msgbx.showinfo(title="ATENÇÃO!", message="O Menu de características já está aberto.")
     ################### FIM selec_car ###################
-
+    '''
     def selec_gray_scale():
         
         top = Toplevel
@@ -282,14 +282,11 @@ class App(Frame):
 
         scale = IntVar()
 
-        R1 = Radiobutton(text='8',value=8,variable=scale,\
-                         command=pinta).pack(anchor=W)
+        R1 = Radiobutton(text='8',value=8,variable=scale).pack(anchor=W)
         
-        R2 = Radiobutton(text='16',value=16,variable=scale,\
-                         command=pinta).pack(anchor=W)
+        R2 = Radiobutton(text='16',value=16,variable=scale).pack(anchor=W)
 
-        R3 = Radiobutton(text='32',value=32,variable=scale,\
-                         command=pinta).pack(anchor=W)
+        R3 = Radiobutton(text='32',value=32,variable=scale).pack(anchor=W)
         
         def on_closing():
             top.quit()
@@ -298,8 +295,17 @@ class App(Frame):
 
         top.protocol("WM_DELETE_WINDOW", on_closing)
         mainloop()
-    ################### FIM selec_gray_scale ###################        
 
+        if (scale.get() == 8):
+            self.scale_gray = 8
+            
+        if (scale.get() == 16):
+            self.scale_gray = 32
+
+        if (scale.get() == 32):
+            self.scale_gray = 32
+    ################### FIM selec_gray_scale ###################  
+    '''
     def trein_clas(self):
         """Treina uma rede neural"""
         if len(self.imagens) == 400:
@@ -369,7 +375,7 @@ class App(Frame):
 
         if self.mlp != None:
             if self.temCrop:
-                self.la2.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
+                self.la2.config(image='',bg="#D8D8D8",width=0,height=0) #Remove a imagem atras do canvas
                 self.temCrop = False
 
                 cropped = cv2.imread('.crop.png')
@@ -482,14 +488,14 @@ class App(Frame):
             aux_img = Image.open(self.filename)
             aux_img = aux_img.resize((self.width, self.height))
             img = ImageTk.PhotoImage(aux_img)
-            self.canvas = tk.Canvas(self.la,bg='#FFFFFF', width=img.width(), height=img.height(), borderwidth=0, highlightthickness=0)
+            self.canvas = tk.Canvas(self.la,bg='#D8D8D8', width=img.width(), height=img.height(), borderwidth=0, highlightthickness=0)
             self.canvas.pack(expand=True)
             self.canvas.img = img  
             self.canvas.create_image(0, 0, image=img, anchor=tk.NW)
             self.temCanvas = True
 
             rect_id = self.canvas.create_rectangle(topx, topy, botx, boty, fill='', outline='LimeGreen', width=2) # Desenha retangulo verde em cima da imagem
-            self.la.config(image='',bg="#FFFFFF",width=0,height=0) #Remove a imagem atras do canvas
+            self.la.config(image='',bg="#D8D8D8",width=0,height=0) #Remove a imagem atras do canvas
             self.temLabel = False
         elif not self.temLabel:
             msgbx.showinfo(title="ATENÇÃO", message="Selecione uma imagem antes!")
@@ -583,15 +589,15 @@ class App(Frame):
 
         #Área em que a imagem ficará presente
         self.la = Label(self)
-        self.la.config(bg='#FFFFFF')
+        self.la.config(bg='#D8D8D8')
         self.la.pack()
 
         #Área que o recorte ficará presente
         self.la2 = Label(self)
-        self.la2.config(bg='#FFFFFF')
+        self.la2.config(bg='#D8D8D8')
         self.la2.pack(side=BOTTOM)
 
         self.pack()
         
 if __name__ == "__main__":
-    app = App(); app.configure(bg='#FFFFFF',); app.mainloop()
+    app = App(); app.configure(bg='#D8D8D8',); app.mainloop()
