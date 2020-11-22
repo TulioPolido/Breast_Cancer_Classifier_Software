@@ -36,6 +36,7 @@ class App(Frame):
 
         result = []
         w = 1.00000000023
+        
         #adiciona os valores normalizados de Hu para uma lista
         result.append(-1*copysign(1.0, huMoments[0][0])*log10(abs(huMoments[0][0])+w))
         result.append(-1*copysign(1.0, huMoments[1][0])*log10(abs(huMoments[1][0])+w))
