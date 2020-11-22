@@ -418,7 +418,9 @@ class App(Frame):
                 if i != j:
                     resp+= matriz[i][j]
 
-        return resp/300
+        resp = 1-(resp/300)
+
+        return resp
     ################### FIM especificidade ###################
 
     def deleta_canvas(self):
