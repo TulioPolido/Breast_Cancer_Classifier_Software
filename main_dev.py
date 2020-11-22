@@ -14,6 +14,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.neural_network import MLPClassifier
+from math import ceil, copysign, log10
 
 np.set_printoptions(precision=2)
 
@@ -24,23 +25,26 @@ class App(Frame):
         """Calcula os momentos de Hu para a imagem e retorna uma lista com os resultados"""
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #converte para cinza
         final = gray/(256/self.scale_gray) #rescalona os valores para o teto de 32
-        final = final.astype(int) #converte para inteiros
-        _,gray = cv2.threshold(gray, int(self.scale_gray/2), int(self.scale_gray), cv2.THRESH_BINARY) #converte para binario
 
-        moments = cv2.moments(gray) #calcula os momentos da imagem
+        # Arredonda os valores fracionados
+        for x in range(len(final)):
+            for y in range(len(final[0])):
+                final[x][y] = ceil(final[x][y])
+
+        moments = cv2.moments(final) #calcula os momentos da imagem
         huMoments = cv2.HuMoments(moments) #calcula os momentos de Hu
-        
-        result = []
-        
-        #adiciona os valores de Hu para uma lista
-        result.append(huMoments[0][0])
-        result.append(huMoments[1][0])
-        result.append(huMoments[2][0])
-        result.append(huMoments[3][0])
-        result.append(huMoments[4][0])
-        result.append(huMoments[5][0])
-        result.append(huMoments[6][0])
 
+        result = []
+        w = 1.00000000023
+        #adiciona os valores normalizados de Hu para uma lista
+        result.append(-1*copysign(1.0, huMoments[0][0])*log10(abs(huMoments[0][0])+w))
+        result.append(-1*copysign(1.0, huMoments[1][0])*log10(abs(huMoments[1][0])+w))
+        result.append(-1*copysign(1.0, huMoments[2][0])*log10(abs(huMoments[2][0])+w))
+        result.append(-1*copysign(1.0, huMoments[3][0])*log10(abs(huMoments[3][0])+w))
+        result.append(-1*copysign(1.0, huMoments[4][0])*log10(abs(huMoments[4][0])+w))
+        result.append(-1*copysign(1.0, huMoments[5][0])*log10(abs(huMoments[5][0])+w))
+        result.append(-1*copysign(1.0, huMoments[6][0])*log10(abs(huMoments[6][0])+w))
+        
         return result
     ################### FIM Hu ###################
     
@@ -75,7 +79,6 @@ class App(Frame):
                 resultado.append(parcial)
             
             dist*=2
-
         return resultado
     ################### FIM Haralick ###################
 
@@ -317,7 +320,7 @@ class App(Frame):
             #seta o vetor de labels
             for i in range(0,400):
                 train_labels.append(int(i/100) + 1)
-        
+
             #Cria o vetor com os valores a serem analisados
             for imagem in self.imagens:
                 val = self.Hu(imagem) + self.Haralick(imagem)
@@ -542,8 +545,6 @@ class App(Frame):
                         matriz[1][0],matriz[1][1],matriz[1][2],matriz[1][3],\
                         matriz[2][0],matriz[2][1],matriz[2][2],matriz[2][3],\
                         matriz[3][0],matriz[3][1],matriz[3][2],matriz[3][3],))
-
-        
         texto = Label(top, text=string)
         texto.pack()
     ################### FIM printaValores ###################
