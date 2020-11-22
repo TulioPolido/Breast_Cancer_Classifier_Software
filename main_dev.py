@@ -169,8 +169,7 @@ class App(Frame):
     def ler_dir(self):
         """Le o diretório e 4 subdiretórios para carregar as imagens para a memória"""
         try:
-            #folder = filedialog.askdirectory()
-            folder = './imagens'
+            folder = filedialog.askdirectory()
 
             for i in range(1,5):
                 subFolder = folder + '/' + str(i)
@@ -348,7 +347,7 @@ class App(Frame):
             self.mlp.fit(feat_train, label_train)
             y_pred = self.mlp.predict(feat_test)
 
-
+            '''
             print("Camadas da rede: {}".format(self.mlp.n_layers_))
             print("Neurônios na camada oculta: {}".format(self.mlp.hidden_layer_sizes))
             print("Neurônios na camada de saída: {}".format(self.mlp.n_outputs_))
@@ -356,7 +355,7 @@ class App(Frame):
             print("Pesos na camada oculta: {}".format(self.mlp.coefs_[1].shape))
 
             print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(feat_train, label_train)))
-            print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(feat_test, label_test)))
+            print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(feat_test, label_test)))'''
 
             # Calcula a matriz de confusão
             cnf_matrix = confusion_matrix(label_test, y_pred)
@@ -368,8 +367,6 @@ class App(Frame):
 
             #Exibindo informações
             self.printaValores(tempo=self.tempo,matriz=cnf_matrix,espec=especificidade,acc=acuracia)
-
-            print('Tempo de execução: {0}'.format(self.tempo))
         else:
             msgbx.showinfo(title="ATENÇÃO", message="Primeiro leia o diretório com as imagens de teste!")
     ################### FIM trein_clas ###################
@@ -391,8 +388,7 @@ class App(Frame):
                 val = np.array(val)
                 prediction = self.mlp.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
 
-                print(prediction)
-                self.printaValores(tempo=t,carac=val)
+                self.printaValores(tempo=t,carac=val,classe=prediction)
             else:
                 msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!") 
         else:
@@ -513,7 +509,7 @@ class App(Frame):
         self.canvas.bind('<Double-Button-1>', confirm_cut) # O usuario deve dar clique duplo para confirmar corte   
     ################### FIM select_area ###################
 
-    def printaValores(self,tempo=None,espec=None,acc=None,matriz=None,carac=None):
+    def printaValores(self,tempo=None,espec=None,acc=None,matriz=None,carac=None,classe=None):
         #Criação Interface
         top = Toplevel()
         top.title("Informações")
@@ -547,6 +543,8 @@ class App(Frame):
                         matriz[1][0],matriz[1][1],matriz[1][2],matriz[1][3],\
                         matriz[2][0],matriz[2][1],matriz[2][2],matriz[2][3],\
                         matriz[3][0],matriz[3][1],matriz[3][2],matriz[3][3],))
+        if classe is not None:
+            string += ('\n\nClasse predita:\t\t%d'%(classe))
         texto = Label(top, text=string)
         texto.pack()
     ################### FIM printaValores ###################
