@@ -347,16 +347,6 @@ class App(Frame):
             self.mlp.fit(feat_train, label_train)
             y_pred = self.mlp.predict(feat_test)
 
-            '''
-            print("Camadas da rede: {}".format(self.mlp.n_layers_))
-            print("Neurônios na camada oculta: {}".format(self.mlp.hidden_layer_sizes))
-            print("Neurônios na camada de saída: {}".format(self.mlp.n_outputs_))
-            print("Pesos na camada de entrada: {}".format(self.mlp.coefs_[0].shape))
-            print("Pesos na camada oculta: {}".format(self.mlp.coefs_[1].shape))
-
-            print("Acurácia da base de treinamento: {:.2f}".format(self.mlp.score(feat_train, label_train)))
-            print("Acurácia da base de teste: {:.2f}".format(self.mlp.score(feat_test, label_test)))'''
-
             # Calcula a matriz de confusão
             cnf_matrix = confusion_matrix(label_test, y_pred)
             acuracia = self.acuracia(cnf_matrix)

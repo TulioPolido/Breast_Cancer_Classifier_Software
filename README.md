@@ -6,7 +6,7 @@ circulares C1, C2, C4, C8 e C16
 
 [X] 7 momentos invariantes de Hu
 
-[ ] Reamostrar nº tons de cinza para <= 32  (parâmetro tem que ser reajustável pelo sistema)
+[X] Reamostrar nº tons de cinza para <= 32  (parâmetro tem que ser reajustável pelo sistema)
 
 [X] Valores calculados para a região selecionada deve ser exibidos em uma janela auxiliar
 
