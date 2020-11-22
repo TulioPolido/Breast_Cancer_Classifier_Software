@@ -313,6 +313,19 @@ class App(Frame):
     def trein_clas(self):
         """Treina uma rede neural"""
         if len(self.imagens) == 400:
+
+            #Exibindo mensagem ao iniciar o treinamento
+            tc = Toplevel()
+            tc.geometry('450x50')
+            tc.title("Treinar Classificador")
+            tc.lift()     #Deixa a tela corrente no topo da pilha (gerenciador de janelas)
+            l = Label(tc, text='\n\nO treinamento está em andamento. Por favor, aguarde.\n\n').pack()
+            
+            #Timer para exibição da janela
+            tc.after(3500, tc.quit)
+            tc.mainloop()
+            tc.destroy()
+                    
             inicio = time.time()
             train_feat = []
             train_labels = []
