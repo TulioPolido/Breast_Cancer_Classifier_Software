@@ -25,8 +25,6 @@ class App(Frame):
         """Calcula os momentos de Hu para a imagem e retorna uma lista com os resultados"""
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) #converte para cinza
         final = gray/(256/self.scale_gray) #rescalona os valores para o teto de 32
-        #final = final.astype(int) #converte para inteiros
-        #_,gray = cv2.threshold(gray, int(self.scale_gray/2), int(self.scale_gray), cv2.THRESH_BINARY) #converte para binario
 
         # Arredonda os valores fracionados
         for x in range(len(final)):
@@ -536,19 +534,17 @@ class App(Frame):
                 string += ('\nHomogeneidade:\t%.6f\n'%(carac[i]))
                 i+=1
             if self.caracteristicas[3]:
-                string += ('\nContraste:\t\t%.6f\n'%(carac[i]))
+                string += ('\nContraste:\t%.6f\n'%(carac[i]))
         if espec is not None:
             string += ('\nEspecificidade:\t%.6f\n'%(espec))
         if acc is not None:
             string += ('\nPrecisão:\t\t%.1f%%\n'%(acc*100))
         if matriz is not None:
-            string += ('\nMatriz de confusão:\n\n\t1\t2\t3\t4\n___________________________________________________\n1|\t%d\t%d\t%d\t%d\n2|\t%d\t%d\t%d\t%d\n3|\t%d\t%d\t%d\t%d\n 4|\t%d\t%d\t%d\t%d\n'\
+            string += ('\nMatriz de confusão:\n\n\t1\t2\t3\t4\n___________________________________________________\n1|\t%d\t%d\t%d\t%d\n2|\t%d\t%d\t%d\t%d\n3|\t%d\t%d\t%d\t%d\n4|\t%d\t%d\t%d\t%d\n'\
                         %(matriz[0][0],matriz[0][1],matriz[0][2],matriz[0][3],\
                         matriz[1][0],matriz[1][1],matriz[1][2],matriz[1][3],\
                         matriz[2][0],matriz[2][1],matriz[2][2],matriz[2][3],\
                         matriz[3][0],matriz[3][1],matriz[3][2],matriz[3][3],))
-
-        
         texto = Label(top, text=string)
         texto.pack()
     ################### FIM printaValores ###################
