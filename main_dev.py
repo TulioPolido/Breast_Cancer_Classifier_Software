@@ -394,7 +394,22 @@ class App(Frame):
 
                 self.printaValores(tempo=t,carac=val,classe=prediction)
             else:
-                msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!") 
+                if self.filename == '':
+                    msgbx.showinfo(title="ATENÇÃO", message="Não há área selecionada para ser analisada!")
+                else: 
+                    self.la.config(image='',bg="#D8D8D8",width=0,height=0) #Remove a imagem atras do canvas
+                    self.temLabel = False
+                    
+                    imagem = cv2.imread(self.filename) 
+                    inicio = time.time()
+                    val = self.Hu(imagem) + self.Haralick(imagem)
+                    t = time.time() - inicio
+
+                    val = np.array(val)
+                    prediction = self.mlp.predict(val.reshape(1,-1))[0] #reshape(1,-1) pq há apenas uma instancia a ser avaliada com multiplos valores
+
+                    self.printaValores(tempo=t,carac=val,classe=prediction)
+
         else:
             msgbx.showinfo(title="ATENÇÃO", message="O classificador não foi treinado!") 
     ################### FIM analisar_area ###################
@@ -454,7 +469,7 @@ class App(Frame):
             msgbx.showinfo(title="ATENÇÃO", message="Selecione uma imagem primeiro")
             return
         
-        if (self.img.width()<=128 and self.img.height()<=128):
+        if (self.img.width()< 128 and self.img.height()< 128):
             msgbx.showinfo(title="ATENÇÃO", message="A imagem selecionada é menor que 128x128")
             return
 
