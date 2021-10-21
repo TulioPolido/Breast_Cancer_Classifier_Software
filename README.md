@@ -1,4 +1,6 @@
-# trabPI
+# Breast Cancer Classifier Software
+
+This is a software developed for the "Image Processing" subject. The objective is to create a software with interface using Python that reads a database and train a Neural Network to classify the type of radiography.
 
 1) 
 [X] Descritor Haralick com homogeneidade, entropia, energia e contraste aplicados às matrizes co-ocorrência
